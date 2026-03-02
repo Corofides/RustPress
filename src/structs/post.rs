@@ -13,13 +13,11 @@ impl Post {
     }
 
     pub fn new(title: &str, content: &str, author: usize) -> Self {
-        let post = Post::default()
+        Self::default()
             .set_id(Self::generate_id())
             .set_title(title)
             .set_content(content)
-            .set_author(author);
-
-        post
+            .set_author(author)
     }
 
     pub fn id(&self) -> &usize {

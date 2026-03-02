@@ -13,12 +13,11 @@ impl Author {
     }
 
     pub fn new(first_name: &str, last_name: &str, display_name: &str) -> Self {
-        Self {
-            id: Author::generate_id(),
-            first_name: first_name.to_string(),
-            last_name: last_name.to_string(),
-            display_name: display_name.to_string(),
-        }
+        Self::default()
+            .set_id(Self::generate_id())
+            .set_first_name(first_name)
+            .set_last_name(last_name)
+            .set_display_name(display_name)
     }
 
     pub fn id(&self) -> &usize {
