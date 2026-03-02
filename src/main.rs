@@ -3,6 +3,7 @@ mod structs;
 use structs::author::Author;
 use structs::post::Post;
 use structs::postmeta::PostMeta;
+use structs::usermeta::UserMeta;
 
 fn main() {
 
@@ -30,8 +31,15 @@ fn main() {
         "The first post"
     );
 
+    let usermeta = UserMeta::new(
+        0,
+        "position",
+        "Content Manager"
+    );
+
     println!("Author: {:?}", jane_doe);
     println!("Author: {:?}", john_smith);
     println!("Post: {:?}", post);
     println!("Postmeta: {:?}", postmeta);
+    println!("Usermeta: {:?}", usermeta);
 }
