@@ -1,11 +1,15 @@
 mod structs;
+mod idgenerator;
 
 use structs::author::Author;
 use structs::post::Post;
 use structs::postmeta::PostMeta;
 use structs::usermeta::UserMeta;
+use idgenerator::IdGenerator;
 
 fn main() {
+
+    let id_generator = IdGenerator::default();
 
     let jane_doe = Author::new(
         "Jane",
