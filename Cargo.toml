@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+async-std = "1.13.2"
+sqlx = { version = "0.8.6", features = [ "runtime-tokio", "sqlite"] }
+tokio = { version = "1.49.0", features = ["macros", "rt-multi-thread"] }

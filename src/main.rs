@@ -7,7 +7,13 @@ use structs::postmeta::PostMeta;
 use structs::usermeta::UserMeta;
 use idgenerator::IdGenerator;
 
-fn main() {
+mod database;
+use crate::database::{Database};
+
+#[tokio::main]
+async fn main() {
+
+    let database = Database::new();
 
     let id_generator = IdGenerator::default();
 
