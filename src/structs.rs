@@ -3,3 +3,4 @@ pub mod post;
 pub mod postmeta;
 pub mod usermeta;
 pub mod terms;
+pub mod presstypes;
