@@ -1,4 +1,4 @@
-pub mod author;
+pub mod user;
 pub mod post;
 pub mod postmeta;
 pub mod usermeta;

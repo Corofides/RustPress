@@ -1,12 +1,12 @@
 #[derive(Debug, Default)]
-pub struct Author {
+pub struct User {
     id: usize,
     first_name: String,
     last_name: String,
     display_name: String,
 }
 
-impl Author {
+impl User {
 
     pub fn generate_id() -> usize {
         0
