@@ -4,7 +4,9 @@ use sqlx::{
     sqlite::SqlitePoolOptions,
     Sqlite,
     Pool,
+    QueryBuilder
 };
+use crate::Post;
 
 const DB_URL: &str = "sqlite://blog.db";
 
@@ -32,6 +34,30 @@ impl Database {
                 Err(error) => panic!("Migration Error: {}", error),
             }
         }
+    }
+
+    pub fn get_posts(&self) -> Vec<Post> {
+        task::block_on(async {
+            if let Some(pool) = self.pool.clone() {
+
+                let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
+                    SELECT id, title, content, author
+                    FROM posts
+                    WHERE 1=1
+                ");
+
+                let query = query_builder.build_query_as::<Post>();
+                let posts: Vec<Post> = query
+                    .fetch_all(&pool)
+                    .await
+                    .unwrap();
+
+                return posts;
+            }
+
+            vec![]
+        })
+
     }
 
     pub fn new() -> Self {

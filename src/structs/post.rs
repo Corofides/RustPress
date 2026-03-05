@@ -1,18 +1,20 @@
-#[derive(Debug, Default)]
+use sqlx::FromRow;
+
+#[derive(FromRow, Debug, Default)]
 pub struct Post {
-    id: usize,
+    id: u32,
     title: String,
     content: String,
-    author: usize,
+    author: u32,
 }
 
 impl Post {
 
-    pub fn generate_id() -> usize {
+    pub fn generate_id() -> u32 {
         0
     }
 
-    pub fn new(title: &str, content: &str, author: usize) -> Self {
+    pub fn new(title: &str, content: &str, author: u32) -> Self {
         Self::default()
             .set_id(Self::generate_id())
             .set_title(title)
@@ -20,11 +22,11 @@ impl Post {
             .set_author(author)
     }
 
-    pub fn id(&self) -> &usize {
+    pub fn id(&self) -> &u32 {
         &self.id
     }
 
-    pub fn set_id(mut self, id: usize) -> Self {
+    pub fn set_id(mut self, id: u32) -> Self {
         self.id = id;
         self
     }
@@ -47,11 +49,11 @@ impl Post {
         self
     }
 
-    pub fn author(&self) -> &usize {
+    pub fn author(&self) -> &u32 {
         &self.author
     }
 
-    pub fn set_author(mut self, author: usize) -> Self {
+    pub fn set_author(mut self, author: u32) -> Self {
         self.author = author;
         self
     }
