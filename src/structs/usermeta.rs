@@ -1,38 +1,40 @@
-#[derive(Default, Debug, Clone)]
+use sqlx::FromRow;
+
+#[derive(FromRow, Default, Debug, Clone)]
 pub struct UserMeta {
-    id: usize,
-    user: usize,
+    id: u32,
+    user: u32,
     key: String,
     value: String
 }
 
 impl UserMeta {
 
-    pub fn generate_id() -> usize {
+    pub fn generate_id() -> u32 {
         0
     }
 
-    pub fn new(user: usize, key: &str, value: &str) -> Self {
+    pub fn new(user: u32, key: &str, value: &str) -> Self {
         UserMeta::default()
             .set_id(Self::generate_id())
             .set_key(key)
             .set_value(value)
     }
 
-    pub fn id(&self) -> &usize {
+    pub fn id(&self) -> &u32 {
         &self.id
     }
 
-    pub fn set_id(mut self, id: usize) -> Self {
+    pub fn set_id(mut self, id: u32) -> Self {
         self.id = id;
         self
     }
 
-    pub fn user(&self) -> &usize {
+    pub fn user(&self) -> &u32 {
         &self.user
     }
 
-    pub fn set_user(mut self, user: usize) -> Self {
+    pub fn set_user(mut self, user: u32) -> Self {
         self.user = user;
         self
     }

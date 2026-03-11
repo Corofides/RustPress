@@ -5,7 +5,7 @@ CREATE TABLE posts (
   author integer
 );
 
-CREATE TABLE postsmeta (
+CREATE TABLE postmeta (
   id integer primary key autoincrement,
   post integer,
   key TEXT,
@@ -19,7 +19,7 @@ CREATE TABLE user (
   display_name TEXT
 );
 
-CREATE TABLE usersmeta (
+CREATE TABLE usermeta (
   id integer primary key autoincrement,
   user integer,
   key TEXT,

@@ -6,8 +6,12 @@ use sqlx::{
     Pool,
     QueryBuilder
 };
-use crate::Post;
-
+use crate::{
+    Post,
+    PostMeta,
+    User,
+    UserMeta,
+};
 const DB_URL: &str = "sqlite://blog.db";
 
 pub struct Database {
@@ -58,6 +62,78 @@ impl Database {
             vec![]
         })
 
+    }
+
+    pub fn get_postmeta(&self) -> Vec<PostMeta> {
+        task::block_on(async {
+
+            if let Some(pool) = self.pool.clone() {
+
+                let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
+                    SELECT id, post, key, value
+                    FROM postmeta
+                    WHERE 1=1
+                ");
+
+                let query = query_builder.build_query_as::<PostMeta>();
+                let postmeta: Vec<PostMeta> = query
+                    .fetch_all(&pool)
+                    .await
+                    .unwrap();
+
+                return postmeta;
+            }
+
+            vec![]
+        })
+    }
+
+    pub fn get_users(&self) -> Vec<User> {
+        task::block_on(async {
+
+            if let Some(pool) = self.pool.clone() {
+
+                let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
+                    SELECT id, first_name, last_name, display_name
+                    FROM user
+                    WHERE 1=1
+                ");
+
+                let query = query_builder.build_query_as::<User>();
+                let users: Vec<User> = query
+                    .fetch_all(&pool)
+                    .await
+                    .unwrap();
+
+                return users;
+
+            }
+
+            vec![]
+        })
+    }
+
+    pub fn get_usermeta(&self) -> Vec<UserMeta> {
+        task::block_on(async {
+            if let Some(pool) = self.pool.clone() {
+
+                let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
+                    SELECT id, user, key, value,
+                    FROM usermeta
+                    WHERE 1=1
+                ");
+
+                let query = query_builder.build_query_as::<UserMeta>();
+                let usermeta: Vec<UserMeta> = query
+                    .fetch_all(&pool)
+                    .await
+                    .unwrap();
+
+                return usermeta;
+            }
+
+            vec![]
+        })
     }
 
     pub fn new() -> Self {

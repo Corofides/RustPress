@@ -1,6 +1,8 @@
-#[derive(Debug, Default)]
+use sqlx::FromRow;
+
+#[derive(FromRow, Debug, Default)]
 pub struct User {
-    id: usize,
+    id: u32,
     first_name: String,
     last_name: String,
     display_name: String,
@@ -8,7 +10,7 @@ pub struct User {
 
 impl User {
 
-    pub fn generate_id() -> usize {
+    pub fn generate_id() -> u32 {
         0
     }
 
@@ -20,11 +22,11 @@ impl User {
             .set_display_name(display_name)
     }
 
-    pub fn id(&self) -> &usize {
+    pub fn id(&self) -> &u32 {
         &self.id
     }
 
-    pub fn set_id(mut self, id: usize) -> Self {
+    pub fn set_id(mut self, id: u32) -> Self {
         self.id = id;
         self
     } 

@@ -1,38 +1,40 @@
-#[derive(Debug, Default)]
+use sqlx::FromRow;
+
+#[derive(FromRow, Debug, Default)]
 pub struct PostMeta {
-    id: usize,
-    post: usize,
+    id: u32,
+    post: u32,
     key: String,
     value: String,
 }
 
 impl PostMeta {
 
-    pub fn generate_id() -> usize {
+    pub fn generate_id() -> u32 {
         0
     }
 
-    pub fn new(post: usize, key: &str, value: &str) -> Self {
+    pub fn new(post: u32, key: &str, value: &str) -> Self {
         PostMeta::default()
             .set_post(post)
             .set_key(key)
             .set_value(value)
     }
 
-    pub fn id(&self) -> &usize {
+    pub fn id(&self) -> &u32 {
         &self.id
     }
 
-    pub fn set_id(mut self, id: usize) -> Self {
+    pub fn set_id(mut self, id: u32) -> Self {
         self.id = id;
         self
     }
 
-    pub fn post(&self) -> &usize {
+    pub fn post(&self) -> &u32 {
         &self.post 
     }
 
-    pub fn set_post(mut self, post: usize) -> Self {
+    pub fn set_post(mut self, post: u32) -> Self {
         self.post = post;
         self
     }
