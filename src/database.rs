@@ -1,5 +1,6 @@
 use async_std::task;
 use sqlx::{
+    SqlitePool,
     migrate::MigrateDatabase,
     sqlite::SqlitePoolOptions,
     Sqlite,
@@ -15,59 +16,32 @@ use crate::{
 const DB_URL: &str = "sqlite://blog.db";
 
 pub struct Database {
-    pool: Option<Pool<Sqlite>>,
+    pool: Pool<Sqlite>,
 }
 
 impl Database {
 
     async fn migrate_db(&mut self) {
-        if let Some(pool) = self.pool.clone() {
+        let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
 
-            let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        let migrations = std::path::Path::new(&crate_dir).join("migrations");
 
-            let migrations = std::path::Path::new(&crate_dir).join("migrations");
+        let migration_result = sqlx::migrate::Migrator::new(migrations)
+            .await
+            .unwrap()
+            .run(&self.pool)
+            .await;
 
-            let migration_result = sqlx::migrate::Migrator::new(migrations)
-                .await
-                .unwrap()
-                .run(&pool)
-                .await;
-
-            match migration_result {
-                Ok(_) => println!("Migration Success!"),
-                Err(error) => panic!("Migration Error: {}", error),
-            }
+        match migration_result {
+            Ok(_) => println!("Migration Success!"),
+            Err(error) => panic!("Migration Error: {}", error),
         }
-    }
-
-    pub fn get_posts(&self) -> Vec<Post> {
-        task::block_on(async {
-            if let Some(pool) = self.pool.clone() {
-
-                let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
-                    SELECT id, title, content, author
-                    FROM posts
-                    WHERE 1=1
-                ");
-
-                let query = query_builder.build_query_as::<Post>();
-                let posts: Vec<Post> = query
-                    .fetch_all(&pool)
-                    .await
-                    .unwrap();
-
-                return posts;
-            }
-
-            vec![]
-        })
-
     }
 
     pub fn get_postmeta(&self) -> Vec<PostMeta> {
         task::block_on(async {
 
-            if let Some(pool) = self.pool.clone() {
+            //if let Some(pool) = self.pool.clone() {
 
                 let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
                     SELECT id, post, key, value
@@ -77,12 +51,12 @@ impl Database {
 
                 let query = query_builder.build_query_as::<PostMeta>();
                 let postmeta: Vec<PostMeta> = query
-                    .fetch_all(&pool)
+                    .fetch_all(&self.pool)
                     .await
                     .unwrap();
 
                 return postmeta;
-            }
+            //}
 
             vec![]
         })
@@ -91,7 +65,7 @@ impl Database {
     pub fn get_users(&self) -> Vec<User> {
         task::block_on(async {
 
-            if let Some(pool) = self.pool.clone() {
+            //if let Some(pool) = self.pool.clone() {
 
                 let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
                     SELECT id, first_name, last_name, display_name
@@ -101,13 +75,13 @@ impl Database {
 
                 let query = query_builder.build_query_as::<User>();
                 let users: Vec<User> = query
-                    .fetch_all(&pool)
+                    .fetch_all(&self.pool)
                     .await
                     .unwrap();
 
                 return users;
 
-            }
+            //}
 
             vec![]
         })
@@ -115,7 +89,7 @@ impl Database {
 
     pub fn get_usermeta(&self) -> Vec<UserMeta> {
         task::block_on(async {
-            if let Some(pool) = self.pool.clone() {
+            //if let Some(pool) = self.pool.clone() {
 
                 let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
                     SELECT id, user, key, value,
@@ -125,12 +99,12 @@ impl Database {
 
                 let query = query_builder.build_query_as::<UserMeta>();
                 let usermeta: Vec<UserMeta> = query
-                    .fetch_all(&pool)
+                    .fetch_all(&self.pool)
                     .await
                     .unwrap();
 
                 return usermeta;
-            }
+            //}
 
             vec![]
         })
@@ -154,7 +128,7 @@ impl Database {
             if let Ok(pool) = pool {
 
                 let mut new_db = Self {
-                    pool: Some(pool)
+                    pool: pool
                 };
 
                 Self::migrate_db(&mut new_db).await;
@@ -164,5 +138,9 @@ impl Database {
                 panic!("Could not start the db!");
             }
         })
+    }
+
+    pub fn get_pool(&self) -> &SqlitePool {
+        &self.pool
     }
 }

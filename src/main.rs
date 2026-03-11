@@ -1,19 +1,30 @@
 mod structs;
 mod idgenerator;
+mod repository;
 
 use structs::user::User;
 use structs::post::Post;
 use structs::postmeta::PostMeta;
 use structs::usermeta::UserMeta;
 use idgenerator::IdGenerator;
+use repository::post_repository::SqlitePostRepository;
 
 mod database;
-use crate::database::{Database};
+use crate::{
+    repository::post_repository::PostRepository,
+    database::{Database},
+};
 
 #[tokio::main]
 async fn main() {
 
     let database = Database::new();
+
+    let post_repository = SqlitePostRepository::new(database.get_pool());
+
+    let posts = post_repository.fetch_all().await;
+
+    println!("Posts {posts:?}");
 
     let id_generator = IdGenerator::default();
 
@@ -34,6 +45,8 @@ async fn main() {
         "this is a post with some content",
         0
     );
+
+    post_repository.create_post(&post).await;
 
     let postmeta = PostMeta::new(
         0,
