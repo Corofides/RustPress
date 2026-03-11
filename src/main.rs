@@ -1,6 +1,7 @@
 mod structs;
 mod idgenerator;
 mod repository;
+mod service;
 
 use structs::user::User;
 use structs::post::Post;
@@ -8,6 +9,7 @@ use structs::postmeta::PostMeta;
 use structs::usermeta::UserMeta;
 use idgenerator::IdGenerator;
 use repository::post_repository::SqlitePostRepository;
+use service::post_service::PostService;
 
 mod database;
 use crate::{
@@ -21,10 +23,12 @@ async fn main() {
     let database = Database::new();
 
     let post_repository = SqlitePostRepository::new(database.get_pool());
+    let post_service = PostService::new(post_repository);
 
-    let posts = post_repository.fetch_all().await;
+    let posts = post_service.get_posts();
 
-    println!("Posts {posts:?}");
+    println!("{:?}", posts);
+
 
     let id_generator = IdGenerator::default();
 
@@ -46,7 +50,7 @@ async fn main() {
         0
     );
 
-    post_repository.create_post(&post).await;
+    //post_repository.create_post(&post).await;
 
     let postmeta = PostMeta::new(
         0,
