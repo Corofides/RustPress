@@ -1,12 +1,16 @@
 use crate::Post;
 use crate::PostRepository;
 use async_std::task;
+use crate::repository::{
+    post_repository::PostFilters,
+    Repository,
+};
 
-pub struct PostService<T: PostRepository> {
+pub struct PostService<T: Repository<Post, PostFilters>> {
     repository: T,
 }
 
-impl<T: PostRepository> PostService<T> {
+impl<T: Repository<Post, PostFilters>> PostService<T> {
     pub fn new(repository: T) -> Self {
         Self {
             repository

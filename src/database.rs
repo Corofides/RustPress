@@ -16,11 +16,17 @@ use crate::{
     UserMeta,
 };
 
+use crate::repository::{
+    Repository,
+    post_repository::{
+        PostFilters,
+    },
+};
 use crate::repository::user_repository::UserRepository;
 
 pub trait Database {
     fn new(db_url: &str) -> Self;
-    fn post_repository(&self) -> impl PostRepository;
+    fn post_repository(&self) -> impl Repository<Post, PostFilters>;
     fn user_repository(&self) -> impl UserRepository;
 }
 
@@ -28,13 +34,12 @@ pub struct SqliteDatabase {
     pool: SqlitePool,
 }
 
-
-
 impl Database for SqliteDatabase {
     
     fn new(db_url: &str) -> Self {
         task::block_on(async {
             if !Sqlite::database_exists(db_url).await.unwrap_or(false) {
+                
                 match Sqlite::create_database(db_url).await {
                     Ok(_) => println!("Created DB"),
                     Err(error) => panic!("Error: {}", error),
@@ -61,7 +66,7 @@ impl Database for SqliteDatabase {
         })
     }
 
-    fn post_repository(&self) -> impl PostRepository {
+    fn post_repository(&self) -> impl Repository<Post, PostFilters> {
         SqlitePostRepository::new(&self.pool)
     }
 
