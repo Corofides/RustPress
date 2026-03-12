@@ -16,6 +16,9 @@ use service::post_service::PostService;
 use service::user_service::UserService;
 
 mod database;
+
+use database::SqliteDatabase;
+
 use crate::{
     repository::post_repository::PostRepository,
     database::{Database},
@@ -24,12 +27,14 @@ use crate::{
 #[tokio::main]
 async fn main() {
 
-    let database = Database::new();
+    let db_url: &str = "sqlite://blog.db";
 
-    let post_repository = SqlitePostRepository::new(database.get_pool());
+    let database = SqliteDatabase::new(db_url);
+
+    let post_repository = database.post_repository();
+    let user_repository = database.user_repository();
+
     let post_service = PostService::new(post_repository);
-
-    let user_repository = SqliteUserRepository::new(database.get_pool());
     let user_service = UserService::new(user_repository);
 
     let jane_doe = User::new(

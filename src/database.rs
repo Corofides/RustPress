@@ -1,25 +1,76 @@
 use async_std::task;
 use sqlx::{
-    SqlitePool,
     migrate::MigrateDatabase,
     sqlite::SqlitePoolOptions,
     Sqlite,
-    Pool,
+    SqlitePool,
     QueryBuilder
 };
 use crate::{
+    SqliteUserRepository,
+    SqlitePostRepository,
+    PostRepository,
     Post,
     PostMeta,
     User,
     UserMeta,
 };
-const DB_URL: &str = "sqlite://blog.db";
 
-pub struct Database {
-    pool: Pool<Sqlite>,
+use crate::repository::user_repository::UserRepository;
+
+pub trait Database {
+    fn new(db_url: &str) -> Self;
+    fn post_repository(&self) -> impl PostRepository;
+    fn user_repository(&self) -> impl UserRepository;
 }
 
-impl Database {
+pub struct SqliteDatabase {
+    pool: SqlitePool,
+}
+
+
+
+impl Database for SqliteDatabase {
+    
+    fn new(db_url: &str) -> Self {
+        task::block_on(async {
+            if !Sqlite::database_exists(db_url).await.unwrap_or(false) {
+                match Sqlite::create_database(db_url).await {
+                    Ok(_) => println!("Created DB"),
+                    Err(error) => panic!("Error: {}", error),
+                }
+            }
+
+            let pool = SqlitePoolOptions::new()
+                .max_connections(5)
+                .connect(db_url)
+                .await;
+
+            if let Ok(pool) = pool {
+
+                let mut new_db = Self {
+                    pool: pool
+                };
+
+                Self::migrate_db(&mut new_db).await;
+
+                new_db
+            } else {
+                panic!("Could not start the db!");
+            }
+        })
+    }
+
+    fn post_repository(&self) -> impl PostRepository {
+        SqlitePostRepository::new(&self.pool)
+    }
+
+    fn user_repository(&self) -> impl UserRepository {
+        SqliteUserRepository::new(&self.pool)
+    }
+}
+
+impl SqliteDatabase {
 
     async fn migrate_db(&mut self) {
         let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -62,31 +113,6 @@ impl Database {
         })
     }
 
-    pub fn get_users(&self) -> Vec<User> {
-        task::block_on(async {
-
-            //if let Some(pool) = self.pool.clone() {
-
-                let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
-                    SELECT id, first_name, last_name, display_name
-                    FROM user
-                    WHERE 1=1
-                ");
-
-                let query = query_builder.build_query_as::<User>();
-                let users: Vec<User> = query
-                    .fetch_all(&self.pool)
-                    .await
-                    .unwrap();
-
-                return users;
-
-            //}
-
-            vec![]
-        })
-    }
-
     pub fn get_usermeta(&self) -> Vec<UserMeta> {
         task::block_on(async {
             //if let Some(pool) = self.pool.clone() {
@@ -108,39 +134,5 @@ impl Database {
 
             vec![]
         })
-    }
-
-    pub fn new() -> Self {
-        task::block_on(async {
-            if !Sqlite::database_exists(DB_URL).await.unwrap_or(false) {
-                println!("Creating DB {}", DB_URL);
-                match Sqlite::create_database(DB_URL).await {
-                    Ok(_) => println!("Created DB"),
-                    Err(error) => panic!("Error: {}", error),
-                }
-            }
-
-            let pool = SqlitePoolOptions::new()
-                .max_connections(5)
-                .connect(DB_URL)
-                .await;
-
-            if let Ok(pool) = pool {
-
-                let mut new_db = Self {
-                    pool: pool
-                };
-
-                Self::migrate_db(&mut new_db).await;
-
-                new_db
-            } else {
-                panic!("Could not start the db!");
-            }
-        })
-    }
-
-    pub fn get_pool(&self) -> &SqlitePool {
-        &self.pool
     }
 }
