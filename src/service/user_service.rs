@@ -1,4 +1,7 @@
-use crate::repository::user_repository::UserRepository;
+use crate::repository::{
+    Repository,
+    user_repository::UserFilters,
+};
 use crate::User;
 use async_std::task;
 
@@ -6,11 +9,11 @@ pub enum ServiceError {
     CreateUserError
 }
 
-pub struct UserService<T: UserRepository> {
+pub struct UserService<T: Repository<User, UserFilters>> {
     repository: T
 }
 
-impl<T: UserRepository> UserService<T> {
+impl<T: Repository<User, UserFilters>> UserService<T> {
     pub fn new(repository: T) -> Self {
         Self {
             repository
@@ -23,10 +26,10 @@ impl<T: UserRepository> UserService<T> {
                 .await
         })
     }
-    pub fn create_user(&self, user: &User) -> Result<(), ServiceError> {
+    pub fn create_user(&self, user: User) -> Result<(), ServiceError> {
         let result = task::block_on(async {
             self.repository
-                .create_user(user)
+                .add(user)
                 .await
         });
 

@@ -18,16 +18,17 @@ use crate::{
 
 use crate::repository::{
     Repository,
+    UserFilters,
     post_repository::{
         PostFilters,
     },
 };
-use crate::repository::user_repository::UserRepository;
+//use crate::repository::user_repository::UserRepository;
 
 pub trait Database {
     fn new(db_url: &str) -> Self;
     fn post_repository(&self) -> impl Repository<Post, PostFilters>;
-    fn user_repository(&self) -> impl UserRepository;
+    fn user_repository(&self) -> impl Repository<User, UserFilters>;
 }
 
 pub struct SqliteDatabase {
@@ -70,7 +71,7 @@ impl Database for SqliteDatabase {
         SqlitePostRepository::new(&self.pool)
     }
 
-    fn user_repository(&self) -> impl UserRepository {
+    fn user_repository(&self) -> impl Repository<User, UserFilters> {
         SqliteUserRepository::new(&self.pool)
     }
 }
