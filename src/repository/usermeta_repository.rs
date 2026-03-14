@@ -1,0 +1,89 @@
+use sqlx::{
+    Sqlite,
+    SqlitePool,
+    QueryBuilder,
+};
+use super::{
+    Repository,
+    RepositoryError
+};
+use crate::structs::usermeta::UserMeta;
+
+pub enum UserMetaFilters {
+}
+
+pub struct UserMetaRepository<'a> {
+    pool: &'a SqlitePool
+}
+
+impl<'a> UserMetaRepository<'a> {
+    pub fn new(pool: &'a SqlitePool) -> Self {
+        Self {
+            pool
+        }
+    }
+}
+
+impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository<'_> {
+    async fn add(&self, item: UserMeta) -> Result<(), RepositoryError> {
+        let _ = sqlx::query("INSERT INTO usermeta (
+                    user, key, value 
+                ) VALUES (
+                    ?,
+                    ?,
+                    ?
+                )
+            ")
+            .bind(item.user())
+            .bind(item.key())
+            .bind(item.value())
+            .execute(self.pool)
+            .await;
+
+        Ok(())
+    }
+
+    async fn fetch(&self, id: u32) -> Option<UserMeta> {
+        let user_meta = sqlx::query_as::<_, UserMeta>("
+                SELECT id, user, key, value FROM user_meta WHERE id = ?
+            ")
+            .bind(id)
+            .fetch_one(self.pool)
+            .await
+            .unwrap();
+
+        return Some(user_meta);
+    }
+
+    async fn fetch_all(&self) -> Vec<UserMeta> {
+        let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
+            SELECT id, user, key, value 
+            FROM user_meta 
+            WHERE 1=1
+        ");
+
+        let query = query_builder.build_query_as::<UserMeta>();
+        let meta: Vec<UserMeta> = query
+            .fetch_all(self.pool)
+            .await
+            .unwrap();
+
+        return meta;
+    }
+
+    async fn fetch_filtered(&self, filters: UserMetaFilters) -> Vec<UserMeta> {
+        let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
+            SELECT id, user, key, value 
+            FROM user_meta 
+            WHERE 1=1
+        ");
+
+        let query = query_builder.build_query_as::<UserMeta>();
+        let meta: Vec<UserMeta> = query
+            .fetch_all(self.pool)
+            .await
+            .unwrap();
+
+        return meta;
+    }
+}

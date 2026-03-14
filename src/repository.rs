@@ -1,10 +1,12 @@
 pub mod post_repository;
 pub mod user_repository;
 pub mod postmeta_repository;
+pub mod usermeta_repository;
 
 pub use user_repository::UserFilters;
 pub use post_repository::PostFilters;
 pub use postmeta_repository::PostmetaFilters;
+pub use usermeta_repository::UserMetaFilters;
 
 pub enum RepositoryError {
     AddItemError
