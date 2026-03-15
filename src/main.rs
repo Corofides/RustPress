@@ -14,6 +14,7 @@ use repository::post_repository::SqlitePostRepository;
 
 use service::post_service::PostService;
 use service::user_service::UserService;
+use service::postmeta_service::PostMetaService;
 
 mod database;
 
@@ -33,9 +34,13 @@ async fn main() {
 
     let post_repository = database.post_repository();
     let user_repository = database.user_repository();
+    let usermeta_repository = database.usermeta_repository();
+    let postmeta_repository = database.postmeta_repository();
 
     let post_service = PostService::new(post_repository);
     let user_service = UserService::new(user_repository);
+    let postmeta_service = PostMetaService::new(postmeta_repository);
+    //let usermeta_service = UserMetaService::new(usermeta_repository);
 
     let jane_doe = User::new(
         "Jane",
