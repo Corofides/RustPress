@@ -3,6 +3,10 @@ mod idgenerator;
 mod repository;
 mod service;
 
+use crate::repository::Repository;
+use crate::repository::UserMetaFilters;
+use crate::repository::PostmetaFilters;
+
 use structs::user::User;
 use structs::post::Post;
 use structs::postmeta::PostMeta;
@@ -17,6 +21,9 @@ use service::user_service::UserService;
 use service::postmeta_service::PostMetaService;
 use service::usermeta_service::UserMetaService;
 
+use std::sync::Arc;
+use tokio::sync::Mutex;
+
 mod database;
 
 use database::SqliteDatabase;
@@ -25,6 +32,16 @@ use crate::{
     repository::post_repository::PostRepository,
     database::{Database},
 };
+
+struct AppState<
+    UserMetaRepository: Repository<UserMeta, UserMetaFilters>, 
+    PostMetaRepository: Repository<PostMeta, PostmetaFilters>
+> {
+    //post_service: Mutex<PostService>,
+    //user_service: Mutex<UserService>,
+    postmeta_service: Mutex<PostMetaService<PostMetaRepository>>,
+    usermeta_service: Mutex<UserMetaService<UserMetaRepository>>,
+}
 
 #[tokio::main]
 async fn main() {
@@ -42,6 +59,13 @@ async fn main() {
     let user_service = UserService::new(user_repository);
     let postmeta_service = PostMetaService::new(postmeta_repository);
     let usermeta_service = UserMetaService::new(usermeta_repository);
+
+    let shared_state = Arc::new(AppState {
+        //post_service,
+        //user_service,
+        postmeta_service: Mutex::new(postmeta_service),
+        usermeta_service: Mutex::new(usermeta_service),
+    });
 
     let jane_doe = User::new(
         "Jane",
