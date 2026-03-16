@@ -13,7 +13,6 @@ use structs::user::User;
 use structs::post::Post;
 use structs::postmeta::PostMeta;
 use structs::usermeta::UserMeta;
-use idgenerator::IdGenerator;
 
 use repository::user_repository::SqliteUserRepository;
 use repository::post_repository::SqlitePostRepository;
@@ -25,6 +24,10 @@ use service::usermeta_service::UserMetaService;
 
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use http::Method;
+use tower_http::cors::CorsLayer;
+use http::HeaderValue;
+use axum::Router;
 
 mod database;
 
@@ -71,6 +74,15 @@ async fn main() {
         usermeta_service: Mutex::new(usermeta_service),
     });
 
+    let cors = CorsLayer::new()
+        .allow_origin("http://localhost:8080/".parse::<HeaderValue>().unwrap())
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_headers(tower_http::cors::Any);
+
+    let app = Router::new()
+        .with_state(shared_state)
+        .layer(cors);
+
     let jane_doe = User::new(
         "Jane",
         "Doe",
@@ -87,19 +99,11 @@ async fn main() {
     println!("Users: {:?}", users);
 
 
-    let id_generator = IdGenerator::default();
-
     let jane_doe = User::new(
         "Jane",
         "Doe",
         "JaneDoe32",
     );
-
-    let john_smith = User::default()
-        .set_id(User::generate_id())
-        .set_first_name("John")
-        .set_last_name("Smith")
-        .set_display_name("JSmith99");
 
     let post = Post::new(
         "Hello Blog",
@@ -122,7 +126,6 @@ async fn main() {
     );
 
     println!("User: {:?}", jane_doe);
-    println!("User: {:?}", john_smith);
     println!("Post: {:?}", post);
     println!("Postmeta: {:?}", postmeta);
     println!("Usermeta: {:?}", usermeta);
