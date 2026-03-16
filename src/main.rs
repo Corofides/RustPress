@@ -4,6 +4,8 @@ mod repository;
 mod service;
 
 use crate::repository::Repository;
+use crate::repository::PostFilters;
+use crate::repository::UserFilters;
 use crate::repository::UserMetaFilters;
 use crate::repository::PostmetaFilters;
 
@@ -34,11 +36,13 @@ use crate::{
 };
 
 struct AppState<
+    PostRepository: Repository<Post, PostFilters>,
+    UserRepository: Repository<User, UserFilters>,
     UserMetaRepository: Repository<UserMeta, UserMetaFilters>, 
     PostMetaRepository: Repository<PostMeta, PostmetaFilters>
 > {
-    //post_service: Mutex<PostService>,
-    //user_service: Mutex<UserService>,
+    post_service: Mutex<PostService<PostRepository>>,
+    user_service: Mutex<UserService<UserRepository>>,
     postmeta_service: Mutex<PostMetaService<PostMetaRepository>>,
     usermeta_service: Mutex<UserMetaService<UserMetaRepository>>,
 }
@@ -61,8 +65,8 @@ async fn main() {
     let usermeta_service = UserMetaService::new(usermeta_repository);
 
     let shared_state = Arc::new(AppState {
-        //post_service,
-        //user_service,
+        post_service: Mutex::new(post_service),
+        user_service: Mutex::new(user_service),
         postmeta_service: Mutex::new(postmeta_service),
         usermeta_service: Mutex::new(usermeta_service),
     });
@@ -73,11 +77,14 @@ async fn main() {
         "JaneDoe32",
     );
 
+    let post_service = shared_state.post_service.lock().await;
+    let user_service = shared_state.user_service.lock().await;
+
     let posts = post_service.get_posts();
     let users = user_service.get_users();
 
-    println!("{:?}", posts);
-    println!("{:?}", users);
+    println!("Posts: {:?}", posts);
+    println!("Users: {:?}", users);
 
 
     let id_generator = IdGenerator::default();
