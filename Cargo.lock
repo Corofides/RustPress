@@ -1285,6 +1285,8 @@ dependencies = [
  "async-std",
  "axum",
  "http",
+ "serde",
+ "serde_json",
  "sqlx",
  "tokio",
  "tower-http",

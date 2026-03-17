@@ -1,6 +1,7 @@
 use sqlx::FromRow;
+use serde::{Serialize, Deserialize};
 
-#[derive(FromRow, Debug, Default)]
+#[derive(Serialize, FromRow, Debug, Default)]
 pub struct Post {
     id: u32,
     title: String,

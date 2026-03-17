@@ -14,6 +14,8 @@ use structs::post::Post;
 use structs::postmeta::PostMeta;
 use structs::usermeta::UserMeta;
 
+//use repository::postmeta_repository::SqlitePostmetaRepository;
+//use repository::usermeta_repository::UserMetaRepository;
 use repository::user_repository::SqliteUserRepository;
 use repository::post_repository::SqlitePostRepository;
 
@@ -28,6 +30,11 @@ use http::Method;
 use tower_http::cors::CorsLayer;
 use http::HeaderValue;
 use axum::Router;
+use axum::routing::get;
+use axum::Json;
+use axum::extract::State;
+
+use serde_json::{Value, json};
 
 mod database;
 
@@ -38,16 +45,18 @@ use crate::{
     database::{Database},
 };
 
+//type RustPressState<'a> = AppState<SqlitePostRepository<'a>, SqliteUserRepository<'a>, UserMetaRepository<'a>, SqlitePostmetaRepository<'a>>;
+
 struct AppState<
     PostRepository: Repository<Post, PostFilters>,
-    UserRepository: Repository<User, UserFilters>,
-    UserMetaRepository: Repository<UserMeta, UserMetaFilters>, 
-    PostMetaRepository: Repository<PostMeta, PostmetaFilters>
+    //UserRepository: Repository<User, UserFilters>,
+    //UserMetaRepository: Repository<UserMeta, UserMetaFilters>, 
+    //PostMetaRepository: Repository<PostMeta, PostmetaFilters>
 > {
     post_service: Mutex<PostService<PostRepository>>,
-    user_service: Mutex<UserService<UserRepository>>,
-    postmeta_service: Mutex<PostMetaService<PostMetaRepository>>,
-    usermeta_service: Mutex<UserMetaService<UserMetaRepository>>,
+    //user_service: Mutex<UserService<UserRepository>>,
+    //postmeta_service: Mutex<PostMetaService<PostMetaRepository>>,
+    //usermeta_service: Mutex<UserMetaService<UserMetaRepository>>,
 }
 
 #[tokio::main]
@@ -55,7 +64,7 @@ async fn main() {
 
     let db_url: &str = "sqlite://blog.db";
 
-    let database = SqliteDatabase::new(db_url);
+    let database: SqliteDatabase = SqliteDatabase::new(db_url);
 
     let post_repository = database.post_repository();
     let user_repository = database.user_repository();
@@ -69,9 +78,9 @@ async fn main() {
 
     let shared_state = Arc::new(AppState {
         post_service: Mutex::new(post_service),
-        user_service: Mutex::new(user_service),
-        postmeta_service: Mutex::new(postmeta_service),
-        usermeta_service: Mutex::new(usermeta_service),
+        //user_service: Mutex::new(user_service),
+        //postmeta_service: Mutex::new(postmeta_service),
+        //usermeta_service: Mutex::new(usermeta_service),
     });
 
     let cors = CorsLayer::new()
@@ -79,9 +88,10 @@ async fn main() {
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers(tower_http::cors::Any);
 
-    let app = Router::new()
-        .with_state(shared_state)
-        .layer(cors);
+    let app: Router<State<SqlitePostRepository>> = Router::new()
+        .route("/posts", get(get_posts))
+        .with_state(shared_state);
+        //.layer(cors);
 
     let jane_doe = User::new(
         "Jane",
@@ -89,14 +99,14 @@ async fn main() {
         "JaneDoe32",
     );
 
-    let post_service = shared_state.post_service.lock().await;
-    let user_service = shared_state.user_service.lock().await;
+    //let post_service = shared_state.post_service.lock().await;
+    //let user_service = shared_state.user_service.lock().await;
 
-    let posts = post_service.get_posts();
-    let users = user_service.get_users();
+    //let posts = post_service.get_posts();
+    //let users = user_service.get_users();
 
-    println!("Posts: {:?}", posts);
-    println!("Users: {:?}", users);
+    //println!("Posts: {:?}", posts);
+    //println!("Users: {:?}", users);
 
 
     let jane_doe = User::new(
@@ -129,4 +139,21 @@ async fn main() {
     println!("Post: {:?}", post);
     println!("Postmeta: {:?}", postmeta);
     println!("Usermeta: {:?}", usermeta);
+
+    //let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    //axum::serve(listener, app).unwrap();
+
+    ()
+}
+
+async fn get_posts<T: Repository<Post, PostFilters>>(State(state): State<Arc<AppState<T>>>) -> Json<Value> {
+
+    let post_service = state.post_service.lock();
+
+    let posts = post_service.await.get_posts();
+
+    Json(json!(
+        posts
+    ))
+
 }
