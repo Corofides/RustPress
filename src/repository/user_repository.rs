@@ -18,19 +18,19 @@ use super::{
 
 pub struct UserFilters {}
 
-pub struct SqliteUserRepository<'a> {
-    pool: &'a SqlitePool,
+pub struct SqliteUserRepository {
+    pool: SqlitePool,
 }
 
-impl<'a> SqliteUserRepository<'a> {
-    pub fn new(pool: &'a SqlitePool) -> Self {
+impl SqliteUserRepository {
+    pub fn new(pool: SqlitePool) -> Self {
         Self {
             pool
         }
     }
 }
 
-impl Repository<User, UserFilters> for SqliteUserRepository<'_> {
+impl Repository<User, UserFilters> for SqliteUserRepository {
     async fn add(&self, item: User) -> Result<(), RepositoryError> {
         let _ = sqlx::query("INSERT INTO user (
                     first_name, last_name, display_name
@@ -43,7 +43,7 @@ impl Repository<User, UserFilters> for SqliteUserRepository<'_> {
             .bind(item.first_name())
             .bind(item.last_name())
             .bind(item.display_name())
-            .execute(self.pool)
+            .execute(&self.pool)
             .await;
 
         Ok(())
@@ -53,7 +53,7 @@ impl Repository<User, UserFilters> for SqliteUserRepository<'_> {
                 SELECT id, first_name, last_name, display_name FROM user WHERE id = ?
             ")
             .bind(id)
-            .fetch_one(self.pool)
+            .fetch_one(&self.pool)
             .await
             .unwrap();
 
@@ -68,7 +68,7 @@ impl Repository<User, UserFilters> for SqliteUserRepository<'_> {
 
         let query = query_builder.build_query_as::<User>();
         let users: Vec<User> = query
-            .fetch_all(self.pool)
+            .fetch_all(&self.pool)
             .await
             .unwrap();
 
@@ -83,7 +83,7 @@ impl Repository<User, UserFilters> for SqliteUserRepository<'_> {
 
         let query = query_builder.build_query_as::<User>();
         let users: Vec<User> = query
-            .fetch_all(self.pool)
+            .fetch_all(&self.pool)
             .await
             .unwrap();
 

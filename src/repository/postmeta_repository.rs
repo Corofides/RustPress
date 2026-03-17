@@ -11,19 +11,19 @@ use crate::structs::postmeta::PostMeta;
 
 pub struct PostmetaFilters {}
 
-pub struct SqlitePostmetaRepository<'a> {
-    pool: &'a SqlitePool
+pub struct SqlitePostmetaRepository {
+    pool: SqlitePool
 }
 
-impl<'a> SqlitePostmetaRepository<'a> {
-    pub fn new(pool: &'a SqlitePool) -> Self {
+impl SqlitePostmetaRepository {
+    pub fn new(pool: SqlitePool) -> Self {
         Self {
             pool
         }
     }
 }
 
-impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository<'_> {
+impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
     async fn add(&self, item: PostMeta) -> Result<(), RepositoryError> {
         let _ = sqlx::query("INSERT INTO postmeta (
                     post, key, value 
@@ -36,7 +36,7 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository<'_> {
             .bind(item.post())
             .bind(item.key())
             .bind(item.value())
-            .execute(self.pool)
+            .execute(&self.pool)
             .await;
 
         Ok(())
@@ -46,7 +46,7 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository<'_> {
                 SELECT id, post, key, value FROM post_meta WHERE id = ?
             ")
             .bind(id)
-            .fetch_one(self.pool)
+            .fetch_one(&self.pool)
             .await
             .unwrap();
 
@@ -61,7 +61,7 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository<'_> {
 
         let query = query_builder.build_query_as::<PostMeta>();
         let meta: Vec<PostMeta> = query
-            .fetch_all(self.pool)
+            .fetch_all(&self.pool)
             .await
             .unwrap();
 
@@ -76,7 +76,7 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository<'_> {
 
         let query = query_builder.build_query_as::<PostMeta>();
         let meta: Vec<PostMeta> = query
-            .fetch_all(self.pool)
+            .fetch_all(&self.pool)
             .await
             .unwrap();
 

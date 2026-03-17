@@ -7,6 +7,8 @@ use sqlx::{
     QueryBuilder
 };
 use crate::{
+    Arc,
+    Mutex,
     SqliteUserRepository,
     SqlitePostRepository,
     PostRepository,
@@ -31,7 +33,7 @@ use crate::repository::{
 
 pub trait Database {
     fn new(db_url: &str) -> Self;
-    fn post_repository(&self) -> impl Repository<Post, PostFilters>;
+    fn post_repository(&self) -> impl Repository<Post, PostFilters> + 'static;
     fn postmeta_repository(&self) -> impl Repository<PostMeta, PostmetaFilters>;
     fn user_repository(&self) -> impl Repository<User, UserFilters>;
     fn usermeta_repository(&self) -> impl Repository<UserMeta, UserMetaFilters>;
@@ -73,20 +75,20 @@ impl Database for SqliteDatabase {
         })
     }
 
-    fn post_repository(&self) -> impl Repository<Post, PostFilters> {
-        SqlitePostRepository::new(&self.pool)
+    fn post_repository(&self) -> impl Repository<Post, PostFilters> + 'static {
+        SqlitePostRepository::new(self.pool.clone())
     }
 
     fn user_repository(&self) -> impl Repository<User, UserFilters> {
-        SqliteUserRepository::new(&self.pool)
+        SqliteUserRepository::new(self.pool.clone())
     }
 
     fn postmeta_repository(&self) -> impl Repository<PostMeta, PostmetaFilters> {
-        SqlitePostmetaRepository::new(&self.pool)
+        SqlitePostmetaRepository::new(self.pool.clone())
     }
 
     fn usermeta_repository(&self) -> impl Repository<UserMeta, UserMetaFilters> {
-        UserMetaRepository::new(&self.pool)
+        UserMetaRepository::new(self.pool.clone())
     }
 }
 

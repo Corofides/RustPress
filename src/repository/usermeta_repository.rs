@@ -12,19 +12,19 @@ use crate::structs::usermeta::UserMeta;
 pub enum UserMetaFilters {
 }
 
-pub struct UserMetaRepository<'a> {
-    pool: &'a SqlitePool
+pub struct UserMetaRepository {
+    pool: SqlitePool
 }
 
-impl<'a> UserMetaRepository<'a> {
-    pub fn new(pool: &'a SqlitePool) -> Self {
+impl UserMetaRepository {
+    pub fn new(pool: SqlitePool) -> Self {
         Self {
             pool
         }
     }
 }
 
-impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository<'_> {
+impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository {
     async fn add(&self, item: UserMeta) -> Result<(), RepositoryError> {
         let _ = sqlx::query("INSERT INTO usermeta (
                     user, key, value 
@@ -37,7 +37,7 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository<'_> {
             .bind(item.user())
             .bind(item.key())
             .bind(item.value())
-            .execute(self.pool)
+            .execute(&self.pool)
             .await;
 
         Ok(())
@@ -48,7 +48,7 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository<'_> {
                 SELECT id, user, key, value FROM user_meta WHERE id = ?
             ")
             .bind(id)
-            .fetch_one(self.pool)
+            .fetch_one(&self.pool)
             .await
             .unwrap();
 
@@ -64,7 +64,7 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository<'_> {
 
         let query = query_builder.build_query_as::<UserMeta>();
         let meta: Vec<UserMeta> = query
-            .fetch_all(self.pool)
+            .fetch_all(&self.pool)
             .await
             .unwrap();
 
@@ -80,7 +80,7 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository<'_> {
 
         let query = query_builder.build_query_as::<UserMeta>();
         let meta: Vec<UserMeta> = query
-            .fetch_all(self.pool)
+            .fetch_all(&self.pool)
             .await
             .unwrap();
 
