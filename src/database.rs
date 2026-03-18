@@ -79,15 +79,15 @@ impl Database for SqliteDatabase {
         SqlitePostRepository::new(self.pool.clone())
     }
 
-    fn user_repository(&self) -> impl Repository<User, UserFilters> {
+    fn user_repository(&self) -> impl Repository<User, UserFilters> + 'static {
         SqliteUserRepository::new(self.pool.clone())
     }
 
-    fn postmeta_repository(&self) -> impl Repository<PostMeta, PostmetaFilters> {
+    fn postmeta_repository(&self) -> impl Repository<PostMeta, PostmetaFilters> + 'static {
         SqlitePostmetaRepository::new(self.pool.clone())
     }
 
-    fn usermeta_repository(&self) -> impl Repository<UserMeta, UserMetaFilters> {
+    fn usermeta_repository(&self) -> impl Repository<UserMeta, UserMetaFilters> + 'static {
         UserMetaRepository::new(self.pool.clone())
     }
 }
