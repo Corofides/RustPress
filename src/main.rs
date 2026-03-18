@@ -60,7 +60,7 @@ struct AppState<
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), sqlx::Error> {
 
     let db_url: &str = "sqlite://blog.db";
 
@@ -88,62 +88,15 @@ async fn main() {
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers(tower_http::cors::Any);
 
-    let app: Router<State<SqlitePostRepository>> = Router::new()
+    let app = Router::new()
         .route("/posts", get(get_posts))
-        .with_state(shared_state);
-        //.layer(cors);
+        .with_state(shared_state)
+        .layer(cors);
+    
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 
-    let jane_doe = User::new(
-        "Jane",
-        "Doe",
-        "JaneDoe32",
-    );
-
-    //let post_service = shared_state.post_service.lock().await;
-    //let user_service = shared_state.user_service.lock().await;
-
-    //let posts = post_service.get_posts();
-    //let users = user_service.get_users();
-
-    //println!("Posts: {:?}", posts);
-    //println!("Users: {:?}", users);
-
-
-    let jane_doe = User::new(
-        "Jane",
-        "Doe",
-        "JaneDoe32",
-    );
-
-    let post = Post::new(
-        "Hello Blog",
-        "this is a post with some content",
-        0
-    );
-
-    //post_repository.create_post(&post).await;
-
-    let postmeta = PostMeta::new(
-        0,
-        "subtitle",
-        "The first post"
-    );
-
-    let usermeta = UserMeta::new(
-        0,
-        "position",
-        "Content Manager"
-    );
-
-    println!("User: {:?}", jane_doe);
-    println!("Post: {:?}", post);
-    println!("Postmeta: {:?}", postmeta);
-    println!("Usermeta: {:?}", usermeta);
-
-    //let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    //axum::serve(listener, app).unwrap();
-
-    ()
+    Ok(())
 }
 
 async fn get_posts<
