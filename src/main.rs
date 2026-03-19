@@ -30,7 +30,7 @@ use http::Method;
 use tower_http::cors::CorsLayer;
 use http::HeaderValue;
 use axum::Router;
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::Json;
 use axum::extract::State;
 
@@ -90,6 +90,7 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let app = Router::new()
         .route("/posts", get(get_posts))
+        .route("/posts", post(add_post))
         .with_state(shared_state)
         .layer(cors);
     
@@ -97,6 +98,21 @@ async fn main() -> Result<(), sqlx::Error> {
     axum::serve(listener, app).await.unwrap();
 
     Ok(())
+}
+
+//type PostRepository = Repository<Post, PostFilters>;
+
+//#[axum::debug_handler]
+async fn add_post(State(state): State<Arc<AppState<PostRepository, UserRepository, UserMetaRepository, PostmetaRepository>>>, Json(payload): Json<Post>) -> Json<Value> {
+    
+        let post_service = state.post_service.lock().await;
+
+        let post_id = 0;
+        
+        Json(json!(
+            post_id
+        ))
+
 }
 
 async fn get_posts<

@@ -1,5 +1,6 @@
 use crate::Post;
 use crate::PostRepository;
+use crate::repository::RepositoryError;
 use async_std::task;
 use crate::repository::{
     post_repository::PostFilters,
@@ -20,6 +21,13 @@ impl<T: Repository<Post, PostFilters>> PostService<T> {
         task::block_on(async {
             self.repository
                 .fetch_all()
+                .await
+        })
+    }
+    pub fn create_post(&self, post: Post) -> Result<(), RepositoryError> {
+        task::block_on(async {
+            self.repository
+                .add(post)
                 .await
         })
     }
