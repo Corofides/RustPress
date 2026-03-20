@@ -47,16 +47,17 @@ use crate::{
 
 //type RustPressState<'a> = AppState<SqlitePostRepository<'a>, SqliteUserRepository<'a>, UserMetaRepository<'a>, SqlitePostmetaRepository<'a>>;
 
-struct AppState<
+struct AppState/*<
     PostRepository: Repository<Post, PostFilters>,
     UserRepository: Repository<User, UserFilters>,
     UserMetaRepository: Repository<UserMeta, UserMetaFilters>, 
     PostMetaRepository: Repository<PostMeta, PostmetaFilters>
-> {
-    post_service: Mutex<PostService<PostRepository>>,
+>*/ {
+    /*post_service: Mutex<PostService<PostRepository>>,
     user_service: Mutex<UserService<UserRepository>>,
     postmeta_service: Mutex<PostMetaService<PostMetaRepository>>,
-    usermeta_service: Mutex<UserMetaService<UserMetaRepository>>,
+    usermeta_service: Mutex<UserMetaService<UserMetaRepository>>,*/
+    database: Mutex<SqliteDatabase>,
 }
 
 #[tokio::main]
@@ -66,7 +67,7 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let database: SqliteDatabase = SqliteDatabase::new(db_url);
 
-    let post_repository = database.post_repository();
+    /*let post_repository = database.post_repository();
     let user_repository = database.user_repository();
     let usermeta_repository = database.usermeta_repository();
     let postmeta_repository = database.postmeta_repository();
@@ -74,13 +75,14 @@ async fn main() -> Result<(), sqlx::Error> {
     let post_service = PostService::new(post_repository);
     let user_service = UserService::new(user_repository);
     let postmeta_service = PostMetaService::new(postmeta_repository);
-    let usermeta_service = UserMetaService::new(usermeta_repository);
+    let usermeta_service = UserMetaService::new(usermeta_repository);*/
 
     let shared_state = Arc::new(AppState {
-        post_service: Mutex::new(post_service),
+        database: Mutex::new(database),
+        /*post_service: Mutex::new(post_service),
         user_service: Mutex::new(user_service),
         postmeta_service: Mutex::new(postmeta_service),
-        usermeta_service: Mutex::new(usermeta_service),
+        usermeta_service: Mutex::new(usermeta_service),*/
     });
 
     let cors = CorsLayer::new()
@@ -90,7 +92,7 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let app = Router::new()
         .route("/posts", get(get_posts))
-        .route("/posts", post(add_post))
+        //.route("/posts", post(add_post))
         .with_state(shared_state)
         .layer(cors);
     
@@ -103,26 +105,30 @@ async fn main() -> Result<(), sqlx::Error> {
 //type PostRepository = Repository<Post, PostFilters>;
 
 //#[axum::debug_handler]
-async fn add_post(State(state): State<Arc<AppState<PostRepository, UserRepository, UserMetaRepository, PostmetaRepository>>>, Json(payload): Json<Post>) -> Json<Value> {
+async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>) -> Json<Value> {
+   
+    let database = state.database.lock().await;
+    let post_repository = database.post_repository();
+    let post_service = PostService::new(post_repository);
+    let post_id = 0;
     
-        let post_service = state.post_service.lock().await;
-
-        let post_id = 0;
-        
-        Json(json!(
-            post_id
-        ))
+    Json(json!(
+        post_id
+    ))
 
 }
 
-async fn get_posts<
+async fn get_posts/*<
         PostRepository: Repository<Post, PostFilters>,
         UserRepository: Repository<User, UserFilters>,
         PostmetaRepository: Repository<PostMeta, PostmetaFilters>,
         UserMetaRepository: Repository<UserMeta, UserMetaFilters>,
-    >(State(state): State<Arc<AppState<PostRepository, UserRepository, UserMetaRepository, PostmetaRepository>>>) -> Json<Value> {
+    >*/(State(state): State<Arc<AppState>>) -> Json<Value> {
 
-    let post_service = state.post_service.lock().await;
+    let database = state.database.lock().await;
+    let post_repository = database.post_repository();
+    let post_service = PostService::new(post_repository);
+
     let posts = post_service.get_posts();
 
     Json(json!(
