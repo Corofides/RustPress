@@ -2,6 +2,7 @@ mod structs;
 mod idgenerator;
 mod repository;
 mod service;
+mod serviceprovider;
 
 use crate::repository::Repository;
 use crate::repository::PostFilters;
@@ -14,6 +15,12 @@ use structs::post::Post;
 use structs::postmeta::PostMeta;
 use structs::usermeta::UserMeta;
 
+use crate::serviceprovider::ServiceProvider;
+
+
+
+//use repository::postmeta_repository::SqlitePostmetaRepository;
+//use repository::usermeta_repository::UserMetaRepository;
 use repository::user_repository::SqliteUserRepository;
 use repository::post_repository::SqlitePostRepository;
 
@@ -45,8 +52,18 @@ use crate::{
 
 //type RustPressState<'a> = AppState<SqlitePostRepository<'a>, SqliteUserRepository<'a>, UserMetaRepository<'a>, SqlitePostmetaRepository<'a>>;
 
-struct AppState {
+struct AppState/*<
+    PostRepository: Repository<Post, PostFilters>,
+    UserRepository: Repository<User, UserFilters>,
+    UserMetaRepository: Repository<UserMeta, UserMetaFilters>, 
+    PostMetaRepository: Repository<PostMeta, PostmetaFilters>
+>*/ {
+    /*post_service: Mutex<PostService<PostRepository>>,
+    user_service: Mutex<UserService<UserRepository>>,
+    postmeta_service: Mutex<PostMetaService<PostMetaRepository>>,
+    usermeta_service: Mutex<UserMetaService<UserMetaRepository>>,*/
     database: Mutex<SqliteDatabase>,
+    service_provider: Mutex<ServiceProvider>,
 }
 
 #[tokio::main]
@@ -55,8 +72,14 @@ async fn main() -> Result<(), sqlx::Error> {
     let db_url: &str = "sqlite://blog.db";
 
     let database: SqliteDatabase = SqliteDatabase::new(db_url);
-    
+
+    let service_provider: ServiceProvider = {
+        let database: SqliteDatabase = SqliteDatabase::new(db_url);
+        ServiceProvider::new(database)
+    }; 
+
     let shared_state = Arc::new(AppState {
+        service_provider: Mutex::new(service_provider),
         database: Mutex::new(database),
     });
 
@@ -94,10 +117,9 @@ async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>)
 
 async fn get_posts(State(state): State<Arc<AppState>>) -> Json<Value> {
 
-    let database = state.database.lock().await;
-    let post_repository = database.post_repository();
-    let post_service = PostService::new(post_repository);
-
+    let service_provider = state.service_provider.lock().await;
+    let post_service = service_provider.post_service();
+    
     let posts = post_service.get_posts();
 
     Json(json!(
