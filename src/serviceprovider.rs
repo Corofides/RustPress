@@ -13,6 +13,8 @@ use crate::UserService;
 use crate::Post;
 use crate::Repository;
 use crate::PostFilters;
+use crate::PostMeta;
+use crate::PostmetaFilters;
 
 pub struct ServiceProvider {
     database: SqliteDatabase,
@@ -38,5 +40,10 @@ impl ServiceProvider {
         let repository = self.database.usermeta_repository();
         let user_meta_service = UserMetaService::new(repository);
         user_meta_service
+    }
+    pub fn post_meta_service(&self) -> PostMetaService<impl Repository<PostMeta, PostmetaFilters>> {
+        let repository = self.database.postmeta_repository();
+        let post_meta_service = PostMetaService::new(repository);
+        post_meta_service
     }
 }

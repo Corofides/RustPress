@@ -50,7 +50,6 @@ use crate::{
     database::{Database},
 };
 
-//type RustPressState<'a> = AppState<SqlitePostRepository<'a>, SqliteUserRepository<'a>, UserMetaRepository<'a>, SqlitePostmetaRepository<'a>>;
 
 struct AppState/*<
     PostRepository: Repository<Post, PostFilters>,
