@@ -1,6 +1,7 @@
 use sqlx::FromRow;
+use serde::Serialize;
 
-#[derive(FromRow, Default, Debug, Clone)]
+#[derive(Serialize, FromRow, Default, Debug, Clone)]
 pub struct UserMeta {
     id: u32,
     user: u32,

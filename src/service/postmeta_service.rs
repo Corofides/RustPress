@@ -3,6 +3,7 @@ use crate::repository::{
     PostmetaFilters,
 };
 use crate::PostMeta;
+use async_std::task;
 
 pub struct PostMetaService<T: Repository<PostMeta, PostmetaFilters>> {
     repository: T 
@@ -13,5 +14,12 @@ impl<T: Repository<PostMeta, PostmetaFilters>> PostMetaService<T> {
         Self {
             repository
         }
+    }
+    pub fn get_post_meta(&self) -> Vec<PostMeta> {
+        task::block_on(async {
+            self.repository
+                .fetch_all()
+                .await
+        })
     }
 }

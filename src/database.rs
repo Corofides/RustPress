@@ -29,14 +29,13 @@ use crate::repository::{
         PostFilters,
     },
 };
-//use crate::repository::user_repository::UserRepository;
 
 pub trait Database {
     fn new(db_url: &str) -> Self;
     fn post_repository(&self) -> impl Repository<Post, PostFilters> + 'static;
-    fn postmeta_repository(&self) -> impl Repository<PostMeta, PostmetaFilters>;
-    fn user_repository(&self) -> impl Repository<User, UserFilters>;
-    fn usermeta_repository(&self) -> impl Repository<UserMeta, UserMetaFilters>;
+    fn post_meta_repository(&self) -> impl Repository<PostMeta, PostmetaFilters> + 'static;
+    fn user_repository(&self) -> impl Repository<User, UserFilters> + 'static;
+    fn user_meta_repository(&self) -> impl Repository<UserMeta, UserMetaFilters> + 'static;
 }
 
 pub struct SqliteDatabase {
@@ -83,11 +82,11 @@ impl Database for SqliteDatabase {
         SqliteUserRepository::new(self.pool.clone())
     }
 
-    fn postmeta_repository(&self) -> impl Repository<PostMeta, PostmetaFilters> + 'static {
+    fn post_meta_repository(&self) -> impl Repository<PostMeta, PostmetaFilters> + 'static {
         SqlitePostmetaRepository::new(self.pool.clone())
     }
 
-    fn usermeta_repository(&self) -> impl Repository<UserMeta, UserMetaFilters> + 'static {
+    fn user_meta_repository(&self) -> impl Repository<UserMeta, UserMetaFilters> + 'static {
         UserMetaRepository::new(self.pool.clone())
     }
 }
@@ -110,51 +109,5 @@ impl SqliteDatabase {
             Err(error) => panic!("Migration Error: {}", error),
         }
     }
-
-    pub fn get_postmeta(&self) -> Vec<PostMeta> {
-        task::block_on(async {
-
-            //if let Some(pool) = self.pool.clone() {
-
-                let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
-                    SELECT id, post, key, value
-                    FROM postmeta
-                    WHERE 1=1
-                ");
-
-                let query = query_builder.build_query_as::<PostMeta>();
-                let postmeta: Vec<PostMeta> = query
-                    .fetch_all(&self.pool)
-                    .await
-                    .unwrap();
-
-                return postmeta;
-            //}
-
-            vec![]
-        })
-    }
-
-    pub fn get_usermeta(&self) -> Vec<UserMeta> {
-        task::block_on(async {
-            //if let Some(pool) = self.pool.clone() {
-
-                let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
-                    SELECT id, user, key, value,
-                    FROM usermeta
-                    WHERE 1=1
-                ");
-
-                let query = query_builder.build_query_as::<UserMeta>();
-                let usermeta: Vec<UserMeta> = query
-                    .fetch_all(&self.pool)
-                    .await
-                    .unwrap();
-
-                return usermeta;
-            //}
-
-            vec![]
-        })
-    }
+    
 }

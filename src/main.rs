@@ -36,7 +36,7 @@ use tower_http::cors::CorsLayer;
 use http::HeaderValue;
 use axum::Router;
 use axum::routing::{get, post};
-use axum::Json;
+use axum::response::Json;
 use axum::extract::State;
 
 use serde_json::{Value, json};
@@ -76,6 +76,9 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let app = Router::new()
         .route("/posts", get(get_posts))
+        .route("/postmeta", get(get_post_meta))
+        //.route("/posts", post(add_post))
+        .route("/users", get(get_users))
         .with_state(shared_state)
         .layer(cors);
     
@@ -98,6 +101,19 @@ async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>)
 
 }
 
+async fn get_post_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
+
+    let service_provider = state.service_provider.lock().await;
+    let post_meta_service = service_provider.post_meta_service();
+
+    let post_meta = post_meta_service.get_post_meta();
+
+    Json(json!(
+        post_meta
+    ))
+
+}
+
 async fn get_posts(State(state): State<Arc<AppState>>) -> Json<Value> {
 
     let service_provider = state.service_provider.lock().await;
@@ -109,4 +125,41 @@ async fn get_posts(State(state): State<Arc<AppState>>) -> Json<Value> {
         posts
     ))
 
+}
+
+async fn get_user_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
+    
+    let service_provider = state.service_provider.lock().await;
+    let user_meta_service = service_provider.user_meta_service();
+
+    let user_meta = user_meta_service.get_user_meta();
+
+    Json(json!(
+        user_meta
+    ))
+
+}
+
+async fn add_user(State(state): State<Arc<AppState>>, Json(payload): Json<User>) -> Json<Value> {
+
+    let service_provider = state.service_provider.lock().await;
+    let user_service = service_provider.user_service();
+
+    let user_id = 0;
+
+    Json(json!(
+        user_id
+    ))
+}
+
+async fn get_users(State(state): State<Arc<AppState>>) -> Json<Value> {
+
+    let service_provider = state.service_provider.lock().await;
+    let user_service = service_provider.user_service();
+
+    let users = user_service.get_users();
+
+    Json(json!(
+        users
+    ))
 }

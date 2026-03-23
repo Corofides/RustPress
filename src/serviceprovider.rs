@@ -37,12 +37,12 @@ impl ServiceProvider {
         user_service
     }
     pub fn user_meta_service(&self) -> UserMetaService<impl Repository<UserMeta, UserMetaFilters>> {
-        let repository = self.database.usermeta_repository();
+        let repository = self.database.user_meta_repository();
         let user_meta_service = UserMetaService::new(repository);
         user_meta_service
     }
     pub fn post_meta_service(&self) -> PostMetaService<impl Repository<PostMeta, PostmetaFilters>> {
-        let repository = self.database.postmeta_repository();
+        let repository = self.database.post_meta_repository();
         let post_meta_service = PostMetaService::new(repository);
         post_meta_service
     }
