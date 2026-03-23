@@ -76,9 +76,11 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let app = Router::new()
         .route("/posts", get(get_posts))
+        .route("/posts", post(add_post))
         .route("/postmeta", get(get_post_meta))
-        //.route("/posts", post(add_post))
         .route("/users", get(get_users))
+        .route("/users", post(add_user))
+        .route("/usermeta", get(get_user_meta))
         .with_state(shared_state)
         .layer(cors);
     
