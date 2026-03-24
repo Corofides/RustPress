@@ -77,11 +77,9 @@ async fn main() -> Result<(), sqlx::Error> {
         .allow_headers(tower_http::cors::Any);
 
     let app = Router::new()
-        // .route("/posts", get(get_posts))
         .nest("/posts", routes::posts::router())
+        .nest("/users", routes::users::router())
         .route("/postmeta", get(get_post_meta))
-        .route("/users", get(get_users))
-        .route("/users", post(add_user))
         .route("/usermeta", get(get_user_meta))
         .with_state(shared_state)
         .layer(cors);
@@ -91,19 +89,6 @@ async fn main() -> Result<(), sqlx::Error> {
 
     Ok(())
 }
-
-/* async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>) -> Json<Value> {
-  
-    let service_provider = state.service_provider.lock().await;
-    let post_service = service_provider.post_service();
-
-    let post_id = 0;
-    
-    Json(json!(
-        post_id
-    ))
-
-} */
 
 async fn get_post_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
 
@@ -118,19 +103,6 @@ async fn get_post_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
 
 }
 
-/*async fn get_posts(State(state): State<Arc<AppState>>) -> Json<Value> {
-
-    let service_provider = state.service_provider.lock().await;
-    let post_service = service_provider.post_service();
-    
-    let posts = post_service.get_posts();
-
-    Json(json!(
-        posts
-    ))
-
-}*/
-
 async fn get_user_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
     
     let service_provider = state.service_provider.lock().await;
@@ -144,26 +116,4 @@ async fn get_user_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
 
 }
 
-async fn add_user(State(state): State<Arc<AppState>>, Json(payload): Json<User>) -> Json<Value> {
 
-    let service_provider = state.service_provider.lock().await;
-    let user_service = service_provider.user_service();
-
-    let user_id = 0;
-
-    Json(json!(
-        user_id
-    ))
-}
-
-async fn get_users(State(state): State<Arc<AppState>>) -> Json<Value> {
-
-    let service_provider = state.service_provider.lock().await;
-    let user_service = service_provider.user_service();
-
-    let users = user_service.get_users();
-
-    Json(json!(
-        users
-    ))
-}
