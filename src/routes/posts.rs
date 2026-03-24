@@ -5,16 +5,31 @@ use serde_json::Value;
 use serde_json::json;
 use axum::routing::{
     Route,
+    MethodRouter,
     get, post,
 };
 use crate::State;
 use crate::AppState;
 use async_std::sync::Arc;
 
+pub fn get_routes() -> Vec<(String, String, MethodRouter<Arc<AppState>>)> {
+    vec![
+        ("/".to_string(), "GET".to_string(), get(get_posts)),
+        ("/".to_string(), "POST".to_string(), post(add_post)),
+    ]
+}
+
 pub fn router() -> Router<Arc<AppState>> {
-    Router::new()
-        .route("/", get(get_posts))
-        .route("/", post(add_post))
+    
+    let routes = get_routes();
+
+    let mut router = Router::new();
+
+    /*for (path, method, operation) in routes {
+        router = router.route(&path, operation);
+    }*/
+
+    return router;
 }
 
 async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>) -> Json<Value> {
