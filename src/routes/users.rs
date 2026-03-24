@@ -12,8 +12,8 @@ use axum::routing::{
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/users", get(get_users))
-        .route("/users", post(add_user))
+        .route("/", get(get_users))
+        .route("/", post(add_user))
 }
 
 async fn add_user(State(state): State<Arc<AppState>>, Json(payload): Json<User>) -> Json<Value> {

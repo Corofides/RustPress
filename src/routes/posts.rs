@@ -13,8 +13,8 @@ use async_std::sync::Arc;
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/posts", get(get_posts))
-        .route("/posts", post(add_post))
+        .route("/", get(get_posts))
+        .route("/", post(add_post))
 }
 
 async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>) -> Json<Value> {
