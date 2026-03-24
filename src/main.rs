@@ -11,6 +11,8 @@ use crate::repository::UserFilters;
 use crate::repository::UserMetaFilters;
 use crate::repository::PostmetaFilters;
 
+use http::StatusCode;
+
 use structs::user::User;
 use structs::post::Post;
 use structs::postmeta::PostMeta;
@@ -57,6 +59,10 @@ struct AppState {
     service_provider: Arc<Mutex<ServiceProvider>>,
 }
 
+async fn fallback() -> (StatusCode, &'static str) {
+    (StatusCode::NOT_FOUND, "Sorry, that isn't available")
+}
+
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
 
@@ -82,7 +88,8 @@ async fn main() -> Result<(), sqlx::Error> {
         .route("/postmeta", get(get_post_meta))
         .route("/usermeta", get(get_user_meta))
         .with_state(shared_state)
-        .layer(cors);
+        .layer(cors)
+        .fallback(fallback);
     
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
