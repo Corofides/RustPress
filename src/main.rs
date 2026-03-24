@@ -3,6 +3,7 @@ mod idgenerator;
 mod repository;
 mod service;
 mod serviceprovider;
+mod routes;
 
 use crate::repository::Repository;
 use crate::repository::PostFilters;
@@ -51,8 +52,9 @@ use crate::{
 };
 
 
+#[derive(Clone)]
 struct AppState {
-    service_provider: Mutex<ServiceProvider>,
+    service_provider: Arc<Mutex<ServiceProvider>>,
 }
 
 #[tokio::main]
@@ -66,7 +68,7 @@ async fn main() -> Result<(), sqlx::Error> {
     }; 
 
     let shared_state = Arc::new(AppState {
-        service_provider: Mutex::new(service_provider),
+        service_provider: Arc::new(Mutex::new(service_provider)),
     });
 
     let cors = CorsLayer::new()
@@ -75,8 +77,8 @@ async fn main() -> Result<(), sqlx::Error> {
         .allow_headers(tower_http::cors::Any);
 
     let app = Router::new()
-        .route("/posts", get(get_posts))
-        .route("/posts", post(add_post))
+        // .route("/posts", get(get_posts))
+        .nest("/posts", routes::posts::router())
         .route("/postmeta", get(get_post_meta))
         .route("/users", get(get_users))
         .route("/users", post(add_user))
@@ -90,7 +92,7 @@ async fn main() -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>) -> Json<Value> {
+/* async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>) -> Json<Value> {
   
     let service_provider = state.service_provider.lock().await;
     let post_service = service_provider.post_service();
@@ -101,7 +103,7 @@ async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>)
         post_id
     ))
 
-}
+} */
 
 async fn get_post_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
 
@@ -116,7 +118,7 @@ async fn get_post_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
 
 }
 
-async fn get_posts(State(state): State<Arc<AppState>>) -> Json<Value> {
+/*async fn get_posts(State(state): State<Arc<AppState>>) -> Json<Value> {
 
     let service_provider = state.service_provider.lock().await;
     let post_service = service_provider.post_service();
@@ -127,7 +129,7 @@ async fn get_posts(State(state): State<Arc<AppState>>) -> Json<Value> {
         posts
     ))
 
-}
+}*/
 
 async fn get_user_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
     
