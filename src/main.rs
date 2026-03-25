@@ -85,8 +85,8 @@ async fn main() -> Result<(), sqlx::Error> {
     let app = Router::new()
         .nest("/posts", routes::posts::router())
         .nest("/users", routes::users::router())
-        .route("/postmeta", get(get_post_meta))
-        .route("/usermeta", get(get_user_meta))
+        .nest("/postmeta", routes::post_meta::router())
+        .nest("/usermeta", routes::post_meta::router())
         .with_state(shared_state)
         .layer(cors)
         .fallback(fallback);
@@ -97,30 +97,8 @@ async fn main() -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-async fn get_post_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
 
-    let service_provider = state.service_provider.lock().await;
-    let post_meta_service = service_provider.post_meta_service();
 
-    let post_meta = post_meta_service.get_post_meta();
 
-    Json(json!(
-        post_meta
-    ))
-
-}
-
-async fn get_user_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
-    
-    let service_provider = state.service_provider.lock().await;
-    let user_meta_service = service_provider.user_meta_service();
-
-    let user_meta = user_meta_service.get_user_meta();
-
-    Json(json!(
-        user_meta
-    ))
-
-}
 
 

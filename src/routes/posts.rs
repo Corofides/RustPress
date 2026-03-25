@@ -25,9 +25,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
     let mut router = Router::new();
 
-    /*for (path, method, operation) in routes {
+    for (path, method, operation) in routes {
         router = router.route(&path, operation);
-    }*/
+    }
 
     return router;
 }
