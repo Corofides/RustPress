@@ -40,35 +40,26 @@ pub fn router() -> Router<Arc<AppState>> {
     return router;
 }
 
-async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>) -> Json<Value> {
+async fn add_post(State(state): State<Arc<AppState>>, Json(post): Json<Post>) -> Result<Json<Value>, RequestError> {
   
     let service_provider = state.service_provider.lock().await;
     let post_service = service_provider.post_service();
 
-    let post_id = 0;
+    let result = post_service.add_post(post);
+
+    match result {
+        Ok(_) => {
+            return Ok(Json(json!(
+               0 
+            )));
+        }
+        Err(_) => {
+            return Err(RequestError::CreationError);
+        }
+    }         
+
     
-    Json(json!(
-        post_id
-    ))
-
 }
-
-/* enum RequestError {
-    NotFound(String),
-}
-
-impl IntoResponse for RequestError {
-    fn into_response(self) -> Response {
-        let (status, message) = match self {
-            Self::NotFound(for_type) => {
-                (StatusCode::NOT_FOUND, format!("{for_type} Not Found"))
-            }
-        };
-
-        (status, Json(json!({ "error": message }))).into_response()
-
-    }
-}*/
 
 #[axum::debug_handler]
 async fn get_post(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) -> Result<Json<Post>, RequestError> {

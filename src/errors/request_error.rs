@@ -8,6 +8,7 @@ use http::StatusCode;
 
 pub enum RequestError {
     NotFound(String),
+    CreationError,
 }
 
 impl IntoResponse for RequestError {
@@ -15,6 +16,9 @@ impl IntoResponse for RequestError {
         let (status, message) = match self {
             Self::NotFound(for_type) => {
                 (StatusCode::NOT_FOUND, format!("{for_type} Not Found"))
+            },
+            Self::CreationError => {
+                (StatusCode::INTERNAL_SERVER_ERROR, format!("Could not create"))
             }
         };
 
