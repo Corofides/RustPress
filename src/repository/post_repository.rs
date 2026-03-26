@@ -55,7 +55,7 @@ impl Repository<Post, PostFilters> for SqlitePostRepository {
     }
     async fn fetch(&self, id: u32) -> Option<Post> {
         let post = sqlx::query_as::<_, Post>("
-                SELECT id, title, content, author FROM post WHERE id = ?
+                SELECT id, title, content, author FROM posts WHERE id = ?
             ")
             .bind(id)
             .fetch_one(&self.pool)
