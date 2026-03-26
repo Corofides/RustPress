@@ -22,4 +22,11 @@ impl<T: Repository<PostMeta, PostmetaFilters>> PostMetaService<T> {
                 .await
         })
     }
+    pub fn get_post_metum(&self, id: u32) -> Option<PostMeta> {
+        task::block_on(async {
+            self.repository
+                .fetch(id)
+                .await
+        })
+    }
 }

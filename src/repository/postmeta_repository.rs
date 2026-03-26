@@ -43,19 +43,25 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
     }
     async fn fetch(&self, id: u32) -> Option<PostMeta> {
         let post_meta = sqlx::query_as::<_, PostMeta>("
-                SELECT id, post, key, value FROM post_meta WHERE id = ?
+                SELECT id, post, key, value FROM postmeta WHERE id = ?
             ")
             .bind(id)
             .fetch_one(&self.pool)
-            .await
-            .unwrap();
+            .await;
 
-        return Some(post_meta);
+        match post_meta {
+            Ok(post_meta) => {
+                return Some(post_meta);
+            }
+            Err(_) => {
+                return None;
+            }
+        }
     }
     async fn fetch_all(&self) -> Vec<PostMeta> {
         let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
             SELECT id, post, key, value 
-            FROM post_meta 
+            FROM postmeta 
             WHERE 1=1
         ");
 

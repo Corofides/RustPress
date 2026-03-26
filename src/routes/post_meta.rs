@@ -1,8 +1,10 @@
+use crate::errors::request_error::RequestError;
 use crate::Post;
 use axum::Router;
 use axum::Json;
 use serde_json::Value;
 use serde_json::json;
+use axum::extract::Path;
 use axum::routing::{
     Route,
     MethodRouter,
@@ -11,11 +13,26 @@ use axum::routing::{
 use crate::State;
 use crate::AppState;
 use async_std::sync::Arc;
-
+use crate::PostMeta;
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/postmeta", get(get_post_meta))
+        .route("/", get(get_post_meta))
+        .route("/{id}", get(get_post_metum))
+}
+
+async fn get_post_metum(State(state): State<Arc<AppState>>, Path(id): Path<u32>) -> Result<Json<PostMeta>, RequestError> {
+
+    let service_provider = state.service_provider.lock().await;
+    let post_meta_service = service_provider.post_meta_service();
+
+    let post_meta = post_meta_service.get_post_metum(id);
+
+    let Some(post_meta) = post_meta else {
+        return Err(RequestError::NotFound("Post Meta".to_string()));
+    };
+
+    Ok(Json(post_meta))
 }
 
 async fn get_post_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
