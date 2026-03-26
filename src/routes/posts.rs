@@ -12,6 +12,7 @@ use axum::routing::{
 use crate::State;
 use crate::AppState;
 use async_std::sync::Arc;
+use http::StatusCode;
 
 pub fn get_routes() -> Vec<(String, String, MethodRouter<Arc<AppState>>)> {
     vec![
@@ -47,14 +48,19 @@ async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>)
 
 }
 
-async fn get_post(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) -> Json<Value> {
+#[axum::debug_handler]
+async fn get_post(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) -> Result<Json<Post>, StatusCode> {
 
     let service_provider = state.service_provider.lock().await;
     let post_service = service_provider.post_service();
 
     let post = post_service.get_post(payload);
 
-    Json(json!(
+    let Some(post) = post else {
+        return Err(StatusCode::NOT_FOUND);
+    };
+
+    Ok(Json(
         post
     ))
 }

@@ -59,10 +59,16 @@ impl Repository<Post, PostFilters> for SqlitePostRepository {
             ")
             .bind(id)
             .fetch_one(&self.pool)
-            .await
-            .unwrap();
+            .await;
 
-        return Some(post);
+        match post {
+            Ok(post) => {
+                return Some(post);
+            }
+            Err(_) => {
+                return None;
+            }
+        }
     }
     async fn fetch_all(&self) -> Vec<Post> {
         let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
