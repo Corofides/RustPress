@@ -1,3 +1,4 @@
+use crate::errors::request_error::RequestError;
 use crate::Post;
 use axum::extract::Path;
 use axum::Router;
@@ -52,22 +53,22 @@ async fn add_post(State(state): State<Arc<AppState>>, Json(payload): Json<Post>)
 
 }
 
-enum RequestError {
-    NotFound,
+/* enum RequestError {
+    NotFound(String),
 }
 
 impl IntoResponse for RequestError {
     fn into_response(self) -> Response {
         let (status, message) = match self {
-            Self::NotFound => {
-                (StatusCode::NOT_FOUND, "Post Not Found")
+            Self::NotFound(for_type) => {
+                (StatusCode::NOT_FOUND, format!("{for_type} Not Found"))
             }
         };
 
         (status, Json(json!({ "error": message }))).into_response()
 
     }
-}
+}*/
 
 #[axum::debug_handler]
 async fn get_post(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) -> Result<Json<Post>, RequestError> {
@@ -78,7 +79,7 @@ async fn get_post(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) 
     let post = post_service.get_post(payload);
 
     let Some(post) = post else {
-        return Err(RequestError::NotFound);
+        return Err(RequestError::NotFound("Post".to_string()));
     };
 
     Ok(Json(

@@ -4,6 +4,7 @@ mod repository;
 mod service;
 mod serviceprovider;
 mod routes;
+mod errors;
 
 use crate::repository::Repository;
 use crate::repository::PostFilters;
