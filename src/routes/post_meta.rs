@@ -21,6 +21,22 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/{id}", get(get_post_metum))
 }
 
+async fn add_post_metum(State(state): State<Arc<AppState>>, Json(post_meta): Json<PostMeta>) -> Result<Json<u32>, RequestError> {
+    let service_provider = state.service_provider.lock().await;
+    let post_meta_service = service_provider.post_meta_service();
+
+    let post_meta = post_meta_service.add_post_metum(post_meta);
+
+    match post_meta {
+        Ok(post_meta) => {
+            return Ok(Json(0));
+        },
+        Err(_) => {
+            return Err(RequestError::CreationError);
+        }
+    }
+}
+
 async fn get_post_metum(State(state): State<Arc<AppState>>, Path(id): Path<u32>) -> Result<Json<PostMeta>, RequestError> {
 
     let service_provider = state.service_provider.lock().await;

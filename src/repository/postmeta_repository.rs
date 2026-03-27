@@ -38,7 +38,6 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
             .bind(item.value())
             .execute(&self.pool)
             .await;
-
         Ok(())
     }
     async fn fetch(&self, id: u32) -> Option<PostMeta> {
