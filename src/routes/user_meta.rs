@@ -32,10 +32,13 @@ async fn get_user_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
 
 }
 
-async fn add_user_metum(State(state): State<Arc<AppState>>) -> Json<Value> {
+async fn add_user_metum(State(state): State<Arc<AppState>>, Path(post): Path<Post>) -> Json<Value> {
 
     let service_provider = state.service_provider.lock().await;
     let user_meta_service = service_provider.user_meta_service();
+
+    println!("Someone is lying here");
+    user_meta_service.add_user_meta(post);
 
     Json(json!(
         user_meta

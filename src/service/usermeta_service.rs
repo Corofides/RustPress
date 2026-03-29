@@ -4,6 +4,7 @@ use crate::repository::{
     Repository,
 };
 use async_std::task;
+use crate::repository::RepositoryError;
 
 pub struct UserMetaService<T: Repository<UserMeta, UserMetaFilters>> {
     repository: T
@@ -26,6 +27,13 @@ impl<T: Repository<UserMeta, UserMetaFilters>> UserMetaService<T> {
         task::block_on(async {
             self.repository
                 .fetch(id)
+                .await
+        })
+    }
+    pub fn add_user_meta(&self, user_meta: UserMeta) -> Result<(), RepositoryError> {
+        task::block_on(async {
+            self.repository
+                .add(user_meta)
                 .await
         })
     }
