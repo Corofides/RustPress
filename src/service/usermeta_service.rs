@@ -22,11 +22,11 @@ impl<T: Repository<UserMeta, UserMetaFilters>> UserMetaService<T> {
                 .await
         })
     }
-    pub fn get_user_metum(&self, id: u32) -> UserMeta {
+    pub fn get_user_metum(&self, id: u32) -> Option<UserMeta> {
         task::block_on(async {
             self.repository
                 .fetch(id)
-                .await()
+                .await
         })
     }
 }
