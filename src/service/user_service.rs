@@ -26,7 +26,7 @@ impl<T: Repository<User, UserFilters>> UserService<T> {
                 .await
         })
     }
-    pub fn create_user(&self, user: User) -> Result<(), ServiceError> {
+    pub fn create_user(&self, user: User) -> Result<i64, ServiceError> {
         let result = task::block_on(async {
             self.repository
                 .add(user)
@@ -34,7 +34,7 @@ impl<T: Repository<User, UserFilters>> UserService<T> {
         });
 
         match result {
-            Ok(_) => return Ok(()),
+            Ok(value) => return Ok(value),
             Err(_) => return Err(ServiceError::CreateUserError)
         }
     }

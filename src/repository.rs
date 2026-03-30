@@ -16,7 +16,7 @@ pub enum RepositoryError {
 }
 
 pub trait Repository<R, F> {
-    async fn add(&self, item: R) -> Result<(), RepositoryError>;
+    async fn add(&self, item: R) -> Result<i64, RepositoryError>;
     async fn fetch(&self, id: u32) -> Option<R>;
     async fn fetch_all(&self) -> Vec<R>;
     async fn fetch_filtered(&self, filters: F) -> Vec<R>;

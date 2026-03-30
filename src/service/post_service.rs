@@ -33,7 +33,7 @@ impl<T: Repository<Post, PostFilters>> PostService<T> {
                 .await
         })
     }
-    pub fn add_post(&self, post: Post) -> Result<(), RepositoryError> {
+    pub fn add_post(&self, post: Post) -> Result<i64, RepositoryError> {
         task::block_on(async {
             self.repository
                 .add(post)

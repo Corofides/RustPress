@@ -24,8 +24,8 @@ impl SqlitePostmetaRepository {
 }
 
 impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
-    async fn add(&self, item: PostMeta) -> Result<(), RepositoryError> {
-        let _ = sqlx::query("INSERT INTO postmeta (
+    async fn add(&self, item: PostMeta) -> Result<i64, RepositoryError> {
+        let result = sqlx::query("INSERT INTO postmeta (
                     post, key, value 
                 ) VALUES (
                     ?,
@@ -38,7 +38,15 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
             .bind(item.value())
             .execute(&self.pool)
             .await;
-        Ok(())
+
+        match result {
+            Ok(result) => {
+                return Ok(result.last_insert_rowid());
+            },
+            Err(_) => {
+                return Err(RepositoryError::AddItemError);
+            }
+        }
     }
     async fn fetch(&self, id: u32) -> Option<PostMeta> {
         let post_meta = sqlx::query_as::<_, PostMeta>("

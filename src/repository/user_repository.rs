@@ -31,8 +31,8 @@ impl SqliteUserRepository {
 }
 
 impl Repository<User, UserFilters> for SqliteUserRepository {
-    async fn add(&self, item: User) -> Result<(), RepositoryError> {
-        let _ = sqlx::query("INSERT INTO user (
+    async fn add(&self, item: User) -> Result<i64, RepositoryError> {
+        let result = sqlx::query("INSERT INTO user (
                     first_name, last_name, display_name
                 ) VALUES (
                     ?,
@@ -46,7 +46,14 @@ impl Repository<User, UserFilters> for SqliteUserRepository {
             .execute(&self.pool)
             .await;
 
-        Ok(())
+        match result {
+            Ok(result) => {
+                return Ok(result.last_insert_rowid());
+            },
+            Err(_) => {
+                return Err(RepositoryError::AddItemError);
+            },
+        }
     }
     async fn fetch(&self, id: u32) -> Option<User> {
         let user = sqlx::query_as::<_, User>("

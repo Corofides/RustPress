@@ -36,8 +36,8 @@ impl SqlitePostRepository {
 }
 
 impl Repository<Post, PostFilters> for SqlitePostRepository {
-    async fn add(&self, post: Post) -> Result<(), RepositoryError> {
-        sqlx::query("INSERT INTO posts (
+    async fn add(&self, post: Post) -> Result<i64, RepositoryError> {
+        let result = sqlx::query("INSERT INTO posts (
                     title, content, author
                 ) VALUES (
                     ?,
@@ -51,7 +51,15 @@ impl Repository<Post, PostFilters> for SqlitePostRepository {
             .execute(&self.pool)
             .await;
 
-        Ok(())
+        match result {
+            Ok(result) => {
+                return Ok(result.last_insert_rowid());
+            },
+            Err(_) => {
+                return Err(RepositoryError::AddItemError);
+            }
+        }
+
     }
     async fn fetch(&self, id: u32) -> Option<Post> {
         let post = sqlx::query_as::<_, Post>("

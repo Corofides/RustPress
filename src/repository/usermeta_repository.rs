@@ -25,8 +25,8 @@ impl UserMetaRepository {
 }
 
 impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository {
-    async fn add(&self, item: UserMeta) -> Result<(), RepositoryError> {
-        let _ = sqlx::query("INSERT INTO usermeta (
+    async fn add(&self, item: UserMeta) -> Result<i64, RepositoryError> {
+        let result = sqlx::query("INSERT INTO usermeta (
                     user, key, value 
                 ) VALUES (
                     ?,
@@ -40,7 +40,14 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository {
             .execute(&self.pool)
             .await;
 
-        Ok(())
+        match result {
+            Ok(result) => {
+                return Ok(result.last_insert_rowid());
+            },
+            Err(_) => {
+                return Err(RepositoryError::AddItemError);
+            }
+        }
     }
 
     async fn fetch(&self, id: u32) -> Option<UserMeta> {

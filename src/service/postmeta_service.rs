@@ -31,7 +31,7 @@ impl<T: Repository<PostMeta, PostmetaFilters>> PostMetaService<T> {
         })
     }
 
-    pub fn add_post_metum(&self, post_meta: PostMeta) -> Result<(), RepositoryError> {
+    pub fn add_post_metum(&self, post_meta: PostMeta) -> Result<i64, RepositoryError> {
         task::block_on(async {
             self.repository
                 .add(post_meta)

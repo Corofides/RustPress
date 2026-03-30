@@ -19,8 +19,10 @@ pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(get_post_meta))
         .route("/{id}", get(get_post_metum))
+        .route("/", post(add_post_metum))
 }
 
+#[axum::debug_handler]
 async fn add_post_metum(State(state): State<Arc<AppState>>, Json(post_meta): Json<PostMeta>) -> Result<Json<u32>, RequestError> {
     let service_provider = state.service_provider.lock().await;
     let post_meta_service = service_provider.post_meta_service();

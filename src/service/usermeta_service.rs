@@ -30,7 +30,7 @@ impl<T: Repository<UserMeta, UserMetaFilters>> UserMetaService<T> {
                 .await
         })
     }
-    pub fn add_user_meta(&self, user_meta: UserMeta) -> Result<(), RepositoryError> {
+    pub fn add_user_meta(&self, user_meta: UserMeta) -> Result<i64, RepositoryError> {
         task::block_on(async {
             self.repository
                 .add(user_meta)

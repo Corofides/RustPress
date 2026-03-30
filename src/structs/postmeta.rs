@@ -1,7 +1,7 @@
 use sqlx::FromRow;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, FromRow, Debug, Default)]
+#[derive(Deserialize, Serialize, FromRow, Debug, Default)]
 pub struct PostMeta {
     id: u32,
     post: u32,
