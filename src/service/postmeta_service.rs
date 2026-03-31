@@ -16,12 +16,22 @@ impl<T: Repository<PostMeta, PostmetaFilters>> PostMetaService<T> {
             repository
         }
     }
-    pub fn get_post_meta(&self) -> Vec<PostMeta> {
+    pub fn get_post_meta(&self, filters: Option<PostmetaFilters>) -> Vec<PostMeta> {
+
+        let Some(filters) = filters else {
+            return task::block_on(async {
+                self.repository
+                    .fetch_all()
+                    .await
+            });
+        };
+
         task::block_on(async {
             self.repository
-                .fetch_all()
+                .fetch_filtered(filters)
                 .await
         })
+        
     }
     pub fn get_post_metum(&self, id: u32) -> Option<PostMeta> {
         task::block_on(async {

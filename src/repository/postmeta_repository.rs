@@ -9,7 +9,9 @@ use super::{
 };
 use crate::structs::postmeta::PostMeta;
 
-pub struct PostmetaFilters {}
+pub struct PostmetaFilters {
+    pub post: Option<u32>,
+}
 
 pub struct SqlitePostmetaRepository {
     pool: SqlitePool
@@ -83,9 +85,14 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
     async fn fetch_filtered(&self, filters: PostmetaFilters) -> Vec<PostMeta> {
         let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
             SELECT id, post, key, value 
-            FROM post_meta 
+            FROM postmeta 
             WHERE 1=1
         ");
+
+        if let Some(post_id) = filters.post {
+            query_builder.push(" AND post = ");
+            query_builder.push_bind(post_id);
+        }
 
         let query = query_builder.build_query_as::<PostMeta>();
         let meta: Vec<PostMeta> = query

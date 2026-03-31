@@ -1,5 +1,6 @@
 use crate::errors::request_error::RequestError;
 use crate::Post;
+use crate::PostmetaFilters;
 use axum::extract::Path;
 use axum::Router;
 use axum::Json;
@@ -81,13 +82,15 @@ async fn get_post(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) 
     ))
 }
 
-async fn get_post_meta(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) -> Result<Json<Vec<PostMeta>>, RequestError> {
+async fn get_post_meta(State(state): State<Arc<AppState>>, Path(post_id): Path<u32>) -> Result<Json<Vec<PostMeta>>, RequestError> {
 
     let service_provider = state.service_provider.lock().await;
 
     let post_meta_service = service_provider.post_meta_service();
 
-    let post_meta = post_meta_service.get_post_meta();
+    let post_meta = post_meta_service.get_post_meta(Some(PostmetaFilters {
+        post: Some(post_id),
+    }));
 
     Ok(Json(
         post_meta
