@@ -12,6 +12,7 @@ use axum::routing::{
 };
 use crate::State;
 use crate::AppState;
+use crate::PostMeta;
 use async_std::sync::Arc;
 use http::StatusCode;
 use axum::response::{
@@ -24,6 +25,7 @@ pub fn get_routes() -> Vec<(String, String, MethodRouter<Arc<AppState>>)> {
         ("/".to_string(), "GET".to_string(), get(get_posts)),
         ("/".to_string(), "POST".to_string(), post(add_post)),
         ("/{id}".to_string(), "GET".to_string(), get(get_post)),
+        ("/{id}/meta".to_string(), "GET".to_string(), get(get_post_meta)),
     ]
 }
 
@@ -65,6 +67,7 @@ async fn add_post(State(state): State<Arc<AppState>>, Json(post): Json<Post>) ->
 async fn get_post(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) -> Result<Json<Post>, RequestError> {
 
     let service_provider = state.service_provider.lock().await;
+
     let post_service = service_provider.post_service();
 
     let post = post_service.get_post(payload);
@@ -75,6 +78,19 @@ async fn get_post(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) 
 
     Ok(Json(
         post
+    ))
+}
+
+async fn get_post_meta(State(state): State<Arc<AppState>>, Path(payload): Path<u32>) -> Result<Json<Vec<PostMeta>>, RequestError> {
+
+    let service_provider = state.service_provider.lock().await;
+
+    let post_meta_service = service_provider.post_meta_service();
+
+    let post_meta = post_meta_service.get_post_meta();
+
+    Ok(Json(
+        post_meta
     ))
 }
 
