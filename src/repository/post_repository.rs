@@ -78,6 +78,23 @@ impl Repository<Post, PostFilters> for SqlitePostRepository {
             }
         }
     }
+    async fn exists(&self, id: u32) -> bool {
+        let exists = sqlx::query("
+                SELECT 1 FROM posts WHERE id = ?
+            ")
+            .bind(id)
+            .fetch_one(&self.pool)
+            .await;
+
+        match exists {
+            Ok(_) => {
+                return true;
+            }
+            Err(_) => {
+                return false;
+            }
+        }
+    }
     async fn fetch_all(&self) -> Vec<Post> {
         let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
             SELECT id, title, content, author

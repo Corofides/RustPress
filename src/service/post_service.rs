@@ -24,6 +24,13 @@ impl<T: Repository<Post, PostFilters>> PostService<T> {
                 .await
         })
     }
+    pub fn exists(&self, id: &u32) -> bool {
+        task::block_on(async {
+            self.repository
+                .exists(id.clone())
+                .await
+        })
+    }
     pub fn get_posts(&self) -> Vec<Post> {
         task::block_on(async {
             self.repository

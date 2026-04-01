@@ -20,4 +20,5 @@ pub trait Repository<R, F> {
     async fn fetch(&self, id: u32) -> Option<R>;
     async fn fetch_all(&self) -> Vec<R>;
     async fn fetch_filtered(&self, filters: F) -> Vec<R>;
+    async fn exists(&self, id: u32) -> bool;
 }

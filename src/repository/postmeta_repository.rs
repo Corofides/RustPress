@@ -75,6 +75,9 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
             }
         }
     }
+    async fn exists(&self, id: u32) -> bool {
+        todo!();
+    }
     async fn fetch(&self, id: u32) -> Option<PostMeta> {
         let post_meta = sqlx::query_as::<_, PostMeta>("
                 SELECT id, post, key, value FROM postmeta WHERE id = ?

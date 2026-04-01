@@ -92,6 +92,15 @@ async fn get_post_meta(State(state): State<Arc<AppState>>, Path(post_id): Path<u
 
     let post_meta = post_meta_service.get_post_meta(Some(filters));
 
+    if post_meta.is_empty() {
+        let post_service = service_provider.post_service();
+        let exists = post_service.exists(&post_id);
+
+        if !exists {
+            return Err(RequestError::NotFound("Post".to_string()));
+        }
+    }
+
     Ok(Json(
         post_meta
     ))
