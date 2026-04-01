@@ -88,9 +88,9 @@ async fn get_post_meta(State(state): State<Arc<AppState>>, Path(post_id): Path<u
 
     let post_meta_service = service_provider.post_meta_service();
 
-    let post_meta = post_meta_service.get_post_meta(Some(PostmetaFilters {
-        post: Some(post_id),
-    }));
+    let filters = PostmetaFilters::new().set_post(&post_id);
+
+    let post_meta = post_meta_service.get_post_meta(Some(filters));
 
     Ok(Json(
         post_meta

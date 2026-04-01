@@ -11,6 +11,31 @@ use crate::structs::postmeta::PostMeta;
 
 pub struct PostmetaFilters {
     pub post: Option<u32>,
+    pub key: Option<String>,
+    pub value: Option<String>,
+}
+
+impl PostmetaFilters {
+    pub fn new() -> Self {
+        return Self {
+            post: None,
+            key: None,
+            value: None,
+        }
+    }
+    pub fn set_post(mut self, post: &u32) -> Self {
+        self.post = Some(post.clone());
+        self
+    }
+    pub fn set_key(mut self, key: &str) -> Self {
+        self.key = Some(key.to_string());
+        self
+    }
+    pub fn set_value(mut self, value: &str) -> Self {
+        self.value = Some(value.to_string());
+        self
+    }
+
 }
 
 pub struct SqlitePostmetaRepository {
@@ -92,6 +117,16 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
         if let Some(post_id) = filters.post {
             query_builder.push(" AND post = ");
             query_builder.push_bind(post_id);
+        }
+
+        if let Some(key) = filters.key {
+            query_builder.push(" AND key = ");
+            query_builder.push_bind(key);
+        }
+
+        if let Some(value) = filters.value {
+            query_builder.push(" AND value = ");
+            query_builder.push_bind(value);
         }
 
         let query = query_builder.build_query_as::<PostMeta>();

@@ -23,8 +23,6 @@ impl<T: Repository<Post, PostFilters>> PostService<T> {
                 .fetch(id)
                 .await
         })
-        //async fn fetch(&self, id: u32) -> Option<Post> {
-
     }
     pub fn get_posts(&self) -> Vec<Post> {
         task::block_on(async {
