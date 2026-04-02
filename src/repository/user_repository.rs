@@ -56,7 +56,21 @@ impl Repository<User, UserFilters> for SqliteUserRepository {
         }
     }
     async fn exists(&self, id: u32) -> bool {
-        todo!();
+        let result = sqlx::query("
+                SELECT 1 FROM user WHERE id = ?
+            ")
+            .bind(id)
+            .execute(&self.pool)
+            .await;
+
+        match result {
+            Ok(result) => {
+                return true;
+            },
+            Err(_) => {
+                return false;
+            }
+        }
     }
     async fn fetch(&self, id: u32) -> Option<User> {
         let user = sqlx::query_as::<_, User>("

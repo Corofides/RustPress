@@ -50,7 +50,21 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository {
         }
     }
     async fn exists(&self, id: u32) -> bool {
-        todo!();
+        let result = sqlx::query("
+                SELECT 1 FROM usermeta WHERE id = ?
+            ")
+            .bind(id)
+            .execute(&self.pool)
+            .await;
+
+        match result {
+            Ok(_) => {
+                return true;
+            },
+            Err(_) => {
+                return false;
+            }
+        }
     }
     async fn fetch(&self, id: u32) -> Option<UserMeta> {
         let user_meta = sqlx::query_as::<_, UserMeta>("
