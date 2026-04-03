@@ -19,6 +19,13 @@ impl<T: Repository<User, UserFilters>> UserService<T> {
             repository
         }
     }
+    pub fn get_user(&self, id: u32) -> Option<User> {
+        task::block_on(async {
+            self.repository
+                .fetch(id)
+                .await
+        })
+    }
     pub fn get_users(&self) -> Vec<User> {
         task::block_on(async {
             self.repository
