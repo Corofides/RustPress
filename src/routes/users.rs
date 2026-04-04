@@ -4,6 +4,7 @@ use axum::extract::State;
 use serde_json::Value;
 use serde_json::json;
 use async_std::sync::Arc;
+use crate::UserMetaFilters;
 use crate::AppState;
 use crate::User;
 use axum::Router;
@@ -45,9 +46,24 @@ async fn get_users(State(state): State<Arc<AppState>>) -> Json<Value> {
 async fn get_user(State(state): State<Arc<AppState>>, Path(id): Path<u32>) -> Json<Value> {
 
     let service_provider = state.service_provider.lock().await;
-    let user_meta = service_provider.user_service();
+    let user_service = service_provider.user_service();
 
-    let user_meta = user_meta.get_user(id);
+    let user = user_service.get_user(id);
+
+    Json(json!(
+        user
+    ))
+}
+
+async fn get_user_meta(State(state): State<Arc<AppState>>, Path(id): Path<u32>) -> Json<Value> {
+
+    let service_provider = state.service_provider.lock().await;
+    let user_meta_service = service_provider.user_meta_service();
+
+    let filters = UserMetaFilters::new()
+        .add_user(&id);
+
+    let user_meta = user_meta_service.get_user_meta(Some(filters));
 
     Json(json!(
         user_meta

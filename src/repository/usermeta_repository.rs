@@ -9,7 +9,20 @@ use super::{
 };
 use crate::structs::usermeta::UserMeta;
 
-pub enum UserMetaFilters {
+pub struct UserMetaFilters {
+    user: Option<u32>
+}
+
+impl UserMetaFilters {
+    pub fn new() -> Self {
+        Self {
+            user: None,
+        }
+    }
+    pub fn add_user(mut self, user: &u32) -> Self {
+        self.user = Some(user.clone());
+        self
+    }
 }
 
 pub struct UserMetaRepository {
