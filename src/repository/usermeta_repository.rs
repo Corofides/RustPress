@@ -10,17 +10,17 @@ use super::{
 use crate::structs::usermeta::UserMeta;
 
 pub struct UserMetaFilters {
-    user: Option<u32>
+    user_id: Option<u32>
 }
 
 impl UserMetaFilters {
     pub fn new() -> Self {
         Self {
-            user: None,
+            user_id: None,
         }
     }
     pub fn add_user(mut self, user: &u32) -> Self {
-        self.user = Some(user.clone());
+        self.user_id = Some(user.clone());
         self
     }
 }
@@ -113,6 +113,11 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository {
             FROM user_meta 
             WHERE 1=1
         ");
+
+        if let Some(user_id) = filters.user_id {
+            query_builder.push(" AND user = ");
+            query_builder.push_bind(user_id);
+        }
 
         let query = query_builder.build_query_as::<UserMeta>();
         let meta: Vec<UserMeta> = query

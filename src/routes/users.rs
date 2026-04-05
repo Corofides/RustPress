@@ -17,6 +17,7 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/", get(get_users))
         .route("/", post(add_user))
         .route("/{id}", get(get_user))
+        .route("/{id}/meta", get(get_user_meta))
 }
 
 async fn add_user(State(state): State<Arc<AppState>>, Json(payload): Json<User>) -> Json<Value> {
