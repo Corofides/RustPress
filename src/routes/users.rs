@@ -11,6 +11,7 @@ use axum::Router;
 use axum::routing::{
     get, post
 };
+use crate::errors::request_error::RequestError;
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
@@ -20,16 +21,21 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/{id}/meta", get(get_user_meta))
 }
 
-async fn add_user(State(state): State<Arc<AppState>>, Json(payload): Json<User>) -> Json<Value> {
+async fn add_user(State(state): State<Arc<AppState>>, Json(user): Json<User>) -> Result<Json<u32>, RequestError> {
 
     let service_provider = state.service_provider.lock().await;
     let user_service = service_provider.user_service();
 
-    let user_id = 0;
+    let result = user_service.create_user(user);
 
-    Json(json!(
-        user_id
-    ))
+    match result {
+        Ok(result) => {
+            return Ok(Json(0));
+        }
+        Err(_) => {
+            return Err(RequestError::CreationError)
+        }
+    }
 }
 
 async fn get_users(State(state): State<Arc<AppState>>) -> Json<Value> {
