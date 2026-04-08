@@ -10,12 +10,18 @@ use sqlx::{
     SqlitePool,
     Error,
 };
+use serde::{
+    Deserialize
+};
 use super::{
     Repository,
     RepositoryError,
 };
 
+#[derive(Deserialize, Debug)]
 pub struct PostFilters {
+    author: Option<u32>,
+    title: Option<String>,
 }
 
 pub trait PostRepository {
@@ -117,6 +123,16 @@ impl Repository<Post, PostFilters> for SqlitePostRepository {
             FROM posts
             WHERE 1=1
         ");
+
+        if let Some(author_id) = filters.author {
+            query_builder.push(" AND author = ");
+            query_builder.push_bind(author_id);
+        }
+
+        if let Some(title) = filters.title {
+            query_builder.push(" AND title = ");
+            query_builder.push_bind(title);
+        }
 
         let query = query_builder.build_query_as::<Post>();
 

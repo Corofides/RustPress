@@ -38,6 +38,13 @@ impl<T: Repository<Post, PostFilters>> PostService<T> {
                 .await
         })
     }
+    pub fn get_filtered_posts(&self, filters: PostFilters) -> Vec<Post> {
+        task::block_on(async {
+            self.repository
+                .fetch_filtered(filters)
+                .await
+        })
+    }
     pub fn add_post(&self, post: Post) -> Result<i64, RepositoryError> {
         task::block_on(async {
             self.repository

@@ -1,7 +1,8 @@
 use crate::errors::request_error::RequestError;
 use crate::Post;
+use crate::PostFilters;
 use crate::PostmetaFilters;
-use axum::extract::Path;
+use axum::extract::{Path, Query};
 use axum::Router;
 use axum::Json;
 use serde_json::Value;
@@ -106,14 +107,17 @@ async fn get_post_meta(State(state): State<Arc<AppState>>, Path(post_id): Path<u
     ))
 }
 
-async fn get_posts(State(state): State<Arc<AppState>>) -> Json<Value> {
+#[axum::debug_handler]
+async fn get_posts(State(state): State<Arc<AppState>>, Query(filters): Query<PostFilters>) -> Result<Json<Vec<Post>>, RequestError> {
 
     let service_provider = state.service_provider.lock().await;
     let post_service = service_provider.post_service();
-    
-    let posts = post_service.get_posts();
 
-    Json(json!(
+    println!("{filters:?}");
+    
+    let posts = post_service.get_filtered_posts(filters);
+
+    Ok(Json(
         posts
     ))
 
