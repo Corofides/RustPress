@@ -22,19 +22,23 @@ use super::{
 
 #[derive(Deserialize, Debug)]
 pub struct Pagination {
-    #[serde(default = "page_default", deserialize_with = "deserialize_number_from_string")]
+    #[serde(default = "Pagination::page_default", deserialize_with = "deserialize_number_from_string")]
     page: u32,
-    #[serde(default = "page_size_default", deserialize_with = "deserialize_number_from_string")]
+    #[serde(default = "Pagination::page_size_default", deserialize_with = "deserialize_number_from_string")]
     page_size: u32,
 }
 
-fn page_default() -> u32 {
-    0
+impl Pagination {
+    fn page_default() -> u32 {
+        0
+    }
+
+    fn page_size_default() -> u32 {
+        20
+    }
 }
 
-fn page_size_default() -> u32 {
-    20
-}
+
 
 impl Default for Pagination {
     fn default() -> Self {
