@@ -4,6 +4,8 @@ use std::sync::{
     Arc,
     Mutex,
 };
+use serde_aux::field_attributes::deserialize_default_from_empty_object;
+use serde_aux::field_attributes::deserialize_number_from_string;
 use sqlx::{
     QueryBuilder,
     Sqlite,
@@ -19,9 +21,36 @@ use super::{
 };
 
 #[derive(Deserialize, Debug)]
+pub struct Pagination {
+    #[serde(default = "page_default", deserialize_with = "deserialize_number_from_string")]
+    page: u32,
+    #[serde(default = "page_size_default", deserialize_with = "deserialize_number_from_string")]
+    page_size: u32,
+}
+
+fn page_default() -> u32 {
+    0
+}
+
+fn page_size_default() -> u32 {
+    20
+}
+
+impl Default for Pagination {
+    fn default() -> Self {
+        Self {
+            page: 0,
+            page_size: 0,
+        }
+    }
+}
+
+#[derive(Deserialize, Debug)]
 pub struct PostFilters {
     author: Option<u32>,
     title: Option<String>,
+    #[serde(flatten)]
+    pagination: Pagination,
 }
 
 pub trait PostRepository {
