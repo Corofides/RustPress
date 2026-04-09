@@ -2,6 +2,7 @@ pub mod post_repository;
 pub mod user_repository;
 pub mod postmeta_repository;
 pub mod usermeta_repository;
+pub mod filters;
 
 pub use postmeta_repository::SqlitePostmetaRepository;
 pub use usermeta_repository::UserMetaRepository;
