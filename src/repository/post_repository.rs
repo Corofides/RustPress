@@ -4,8 +4,6 @@ use std::sync::{
     Arc,
     Mutex,
 };
-use serde_aux::field_attributes::deserialize_default_from_empty_object;
-use serde_aux::field_attributes::deserialize_number_from_string;
 use sqlx::{
     QueryBuilder,
     Sqlite,
@@ -19,35 +17,9 @@ use super::{
     Repository,
     RepositoryError,
 };
-
-#[derive(Deserialize, Debug)]
-pub struct Pagination {
-    #[serde(default = "Pagination::page_default", deserialize_with = "deserialize_number_from_string")]
-    page: u32,
-    #[serde(default = "Pagination::page_size_default", deserialize_with = "deserialize_number_from_string")]
-    page_size: u32,
-}
-
-impl Pagination {
-    fn page_default() -> u32 {
-        0
-    }
-
-    fn page_size_default() -> u32 {
-        20
-    }
-}
+use crate::repository::filters::Pagination;
 
 
-
-impl Default for Pagination {
-    fn default() -> Self {
-        Self {
-            page: 0,
-            page_size: 0,
-        }
-    }
-}
 
 #[derive(Deserialize, Debug)]
 pub struct PostFilters {
@@ -166,6 +138,12 @@ impl Repository<Post, PostFilters> for SqlitePostRepository {
             query_builder.push(" AND title = ");
             query_builder.push_bind(title);
         }
+
+        query_builder.push(" LIMIT = ");
+        query_builder.push_bind(filters.pagination.page_size);
+
+        query_builder.push(" OFFSET = ");
+        query_builder.push_bind(filters.pagination.offset());
 
         let query = query_builder.build_query_as::<Post>();
 
