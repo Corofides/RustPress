@@ -9,7 +9,9 @@ use super::{
 };
 use crate::structs::postmeta::PostMeta;
 use crate::repository::filters::Pagination;
+use serde::Deserialize;
 
+#[derive(Deserialize)]
 pub struct PostmetaFilters {
     pub post: Option<u32>,
     pub key: Option<String>,

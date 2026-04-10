@@ -2,6 +2,8 @@ use crate::errors::request_error::RequestError;
 use crate::Post;
 use axum::Router;
 use axum::Json;
+use axum::extract::Query;
+use crate::PostmetaFilters;
 use serde_json::Value;
 use serde_json::json;
 use axum::extract::Path;
@@ -53,7 +55,8 @@ async fn get_post_metum(State(state): State<Arc<AppState>>, Path(id): Path<u32>)
     Ok(Json(post_meta))
 }
 
-async fn get_post_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
+#[axum::debug_handler]
+async fn get_post_meta(State(state): State<Arc<AppState>>, Query(filters): Query<PostmetaFilters>) -> Json<Value> {
 
     let service_provider = state.service_provider.lock().await;
     let post_meta_service = service_provider.post_meta_service();
