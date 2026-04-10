@@ -113,8 +113,6 @@ async fn get_posts(State(state): State<Arc<AppState>>, Query(filters): Query<Pos
     let service_provider = state.service_provider.lock().await;
     let post_service = service_provider.post_service();
 
-    println!("{filters:?}");
-    
     let posts = post_service.get_filtered_posts(filters);
 
     Ok(Json(

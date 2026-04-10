@@ -8,11 +8,13 @@ use super::{
     RepositoryError,
 };
 use crate::structs::postmeta::PostMeta;
+use crate::repository::filters::Pagination;
 
 pub struct PostmetaFilters {
     pub post: Option<u32>,
     pub key: Option<String>,
     pub value: Option<String>,
+    pub pagination: Pagination,
 }
 
 impl PostmetaFilters {
@@ -21,6 +23,7 @@ impl PostmetaFilters {
             post: None,
             key: None,
             value: None,
+            pagination: Pagination::default(),
         }
     }
     pub fn set_post(mut self, post: &u32) -> Self {
@@ -145,6 +148,13 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
             query_builder.push(" AND value = ");
             query_builder.push_bind(value);
         }
+
+        query_builder.push(" LIMIT = ");
+        query_builder.push_bind(filters.pagination.page_size);
+
+        query_builder.push(" OFFSET = ");
+        query_builder.push_bind(filters.pagination.offset());
+
 
         let query = query_builder.build_query_as::<PostMeta>();
         let meta: Vec<PostMeta> = query

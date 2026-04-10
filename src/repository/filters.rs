@@ -2,7 +2,7 @@ use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_default_from_empty_object;
 use serde_aux::field_attributes::deserialize_number_from_string;
 
-#[derive(Deserialize, Debug)]
+#[derive(Default, Deserialize, Debug)]
 pub struct Pagination {
     #[serde(default = "Pagination::page_default", deserialize_with = "deserialize_number_from_string")]
     pub page: u32,
