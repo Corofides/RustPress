@@ -61,7 +61,7 @@ async fn get_post_meta(State(state): State<Arc<AppState>>, Query(filters): Query
     let service_provider = state.service_provider.lock().await;
     let post_meta_service = service_provider.post_meta_service();
 
-    let post_meta = post_meta_service.get_post_meta(None);
+    let post_meta = post_meta_service.get_post_meta(filters);
 
     Json(json!(
         post_meta

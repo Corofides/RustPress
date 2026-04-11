@@ -91,7 +91,7 @@ async fn get_post_meta(State(state): State<Arc<AppState>>, Path(post_id): Path<u
 
     let filters = PostmetaFilters::new().set_post(&post_id);
 
-    let post_meta = post_meta_service.get_post_meta(Some(filters));
+    let post_meta = post_meta_service.get_post_meta(filters);
 
     if post_meta.is_empty() {
         let post_service = service_provider.post_service();
