@@ -26,10 +26,10 @@ impl<T: Repository<User, UserFilters>> UserService<T> {
                 .await
         })
     }
-    pub fn get_users(&self) -> Vec<User> {
+    pub fn get_users(&self, filters: UserFilters) -> Vec<User> {
         task::block_on(async {
             self.repository
-                .fetch_all()
+                .fetch_filtered(filters)
                 .await
         })
     }

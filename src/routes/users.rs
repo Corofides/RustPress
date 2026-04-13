@@ -1,6 +1,8 @@
 use axum::Json;
+use crate::UserFilters;
 use axum::extract::Path;
 use axum::extract::State;
+use axum::extract::Query;
 use serde_json::Value;
 use serde_json::json;
 use async_std::sync::Arc;
@@ -38,12 +40,12 @@ async fn add_user(State(state): State<Arc<AppState>>, Json(user): Json<User>) ->
     }
 }
 
-async fn get_users(State(state): State<Arc<AppState>>) -> Json<Value> {
+async fn get_users(State(state): State<Arc<AppState>>, Query(filters): Query<UserFilters>) -> Json<Value> {
 
     let service_provider = state.service_provider.lock().await;
     let user_service = service_provider.user_service();
 
-    let users = user_service.get_users();
+    let users = user_service.get_users(filters);
 
     Json(json!(
         users
