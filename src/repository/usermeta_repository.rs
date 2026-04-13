@@ -8,19 +8,37 @@ use super::{
     RepositoryError
 };
 use crate::structs::usermeta::UserMeta;
+use crate::repository::filters::Pagination;
+use serde::Deserialize;
 
+#[derive(Deserialize)]
 pub struct UserMetaFilters {
-    user_id: Option<u32>
+    user_id: Option<u32>,
+    key: Option<String>,
+    value: Option<String>,
+    #[serde(flatten)]
+    pagination: Pagination,
 }
 
 impl UserMetaFilters {
     pub fn new() -> Self {
         Self {
             user_id: None,
+            key: None,
+            value: None,
+            pagination: Pagination::default()
         }
     }
     pub fn add_user(mut self, user: &u32) -> Self {
         self.user_id = Some(user.clone());
+        self
+    }
+    pub fn add_key(mut self, key: &str) -> Self {
+        self.key = Some(key.to_string());
+        self
+    }
+    pub fn add_value(mut self, value: &str) -> Self {
+        self.key = Some(value.to_string());
         self
     }
 }

@@ -135,15 +135,18 @@ impl Repository<Post, PostFilters> for SqlitePostRepository {
         }
 
         if let Some(title) = filters.title {
-            query_builder.push(" AND title = ");
+            query_builder.push(" AND title LIKE ");
             query_builder.push_bind(title);
+            //query_builder.push("%");
         }
 
-        query_builder.push(" LIMIT = ");
+        query_builder.push(" LIMIT ");
         query_builder.push_bind(filters.pagination.page_size);
 
-        query_builder.push(" OFFSET = ");
+        query_builder.push(" OFFSET ");
         query_builder.push_bind(filters.pagination.offset());
+
+        //println!("{query_builder:?}");
 
         let query = query_builder.build_query_as::<Post>();
 

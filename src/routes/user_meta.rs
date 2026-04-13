@@ -20,12 +20,12 @@ pub fn router() -> Router<Arc<AppState>> {
 
 
 
-async fn get_user_meta(State(state): State<Arc<AppState>>) -> Json<Value> {
+async fn get_user_meta(State(state): State<Arc<AppState>>, Query(filters): Query<UserMetaFilters>) -> Json<Value> {
     
     let service_provider = state.service_provider.lock().await;
     let user_meta_service = service_provider.user_meta_service();
 
-    let user_meta = user_meta_service.get_user_meta();
+    let user_meta = user_meta_service.get_user_meta(filters);
 
     Json(json!(
         user_meta
