@@ -13,11 +13,11 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct UserMetaFilters {
-    user_id: Option<u32>,
-    key: Option<String>,
-    value: Option<String>,
+    pub user_id: Option<u32>,
+    pub key: Option<String>,
+    pub value: Option<String>,
     #[serde(flatten)]
-    pagination: Pagination,
+    pub pagination: Pagination,
 }
 
 impl UserMetaFilters {

@@ -16,6 +16,7 @@ pub struct PostmetaFilters {
     pub post: Option<u32>,
     pub key: Option<String>,
     pub value: Option<String>,
+    #[serde(flatten)]
     pub pagination: Pagination,
 }
 
@@ -151,10 +152,10 @@ impl Repository<PostMeta, PostmetaFilters> for SqlitePostmetaRepository {
             query_builder.push_bind(value);
         }
 
-        query_builder.push(" LIMIT = ");
+        query_builder.push(" LIMIT ");
         query_builder.push_bind(filters.pagination.page_size);
 
-        query_builder.push(" OFFSET = ");
+        query_builder.push(" OFFSET ");
         query_builder.push_bind(filters.pagination.offset());
 
 

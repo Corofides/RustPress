@@ -56,14 +56,14 @@ async fn get_post_metum(State(state): State<Arc<AppState>>, Path(id): Path<u32>)
 }
 
 #[axum::debug_handler]
-async fn get_post_meta(State(state): State<Arc<AppState>>, Query(filters): Query<PostmetaFilters>) -> Json<Value> {
+async fn get_post_meta(State(state): State<Arc<AppState>>, Query(filters): Query<PostmetaFilters>) -> Result<Json<Vec<PostMeta>>, RequestError> {
 
     let service_provider = state.service_provider.lock().await;
     let post_meta_service = service_provider.post_meta_service();
 
     let post_meta = post_meta_service.get_post_meta(filters);
 
-    Json(json!(
+    Ok(Json(
         post_meta
     ))
 
