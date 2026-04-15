@@ -11,7 +11,7 @@ use crate::structs::usermeta::UserMeta;
 use crate::repository::filters::Pagination;
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct UserMetaFilters {
     pub user_id: Option<u32>,
     pub key: Option<String>,
@@ -99,7 +99,7 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository {
     }
     async fn fetch(&self, id: u32) -> Option<UserMeta> {
         let user_meta = sqlx::query_as::<_, UserMeta>("
-                SELECT id, user, key, value FROM user_meta WHERE id = ?
+                SELECT id, user, key, value FROM usermeta WHERE id = ?
             ")
             .bind(id)
             .fetch_one(&self.pool)
@@ -112,7 +112,7 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository {
     async fn fetch_all(&self) -> Vec<UserMeta> {
         let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
             SELECT id, user, key, value 
-            FROM user_meta 
+            FROM usermeta 
             WHERE 1=1
         ");
 
@@ -128,7 +128,7 @@ impl Repository<UserMeta, UserMetaFilters> for UserMetaRepository {
     async fn fetch_filtered(&self, filters: UserMetaFilters) -> Vec<UserMeta> {
         let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("
             SELECT id, user, key, value 
-            FROM user_meta 
+            FROM usermeta 
             WHERE 1=1
         ");
 

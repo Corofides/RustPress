@@ -17,9 +17,8 @@ use super::{
     Repository,
     RepositoryError,
 };
+
 use crate::repository::filters::Pagination;
-
-
 
 #[derive(Deserialize, Debug)]
 pub struct PostFilters {

@@ -16,21 +16,14 @@ impl<T: Repository<UserMeta, UserMetaFilters>> UserMetaService<T> {
             repository
         }
     }
-    pub fn get_user_meta(&self, filter: Option<UserMetaFilters>) -> Vec<UserMeta> {
+    pub fn get_user_meta(&self, filter: UserMetaFilters) -> Vec<UserMeta> {
         
-        if let Some(filter) = filter {
-            return task::block_on(async {
-                self.repository
-                    .fetch_filtered(filter)
-                    .await
-            })
-        }
-
         task::block_on(async {
             self.repository
-                .fetch_all()
+                .fetch_filtered(filter)
                 .await
         })
+
     }
     pub fn get_user_metum(&self, id: u32) -> Option<UserMeta> {
         task::block_on(async {

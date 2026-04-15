@@ -72,7 +72,7 @@ async fn get_user_meta(State(state): State<Arc<AppState>>, Path(id): Path<u32>) 
     let filters = UserMetaFilters::new()
         .add_user(&id);
 
-    let user_meta = user_meta_service.get_user_meta(Some(filters));
+    let user_meta = user_meta_service.get_user_meta(filters);
 
     Json(json!(
         user_meta

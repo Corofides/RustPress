@@ -87,7 +87,7 @@ async fn main() -> Result<(), sqlx::Error> {
         .nest("/posts", routes::posts::router())
         .nest("/users", routes::users::router())
         .nest("/postmeta", routes::post_meta::router())
-        .nest("/usermeta", routes::post_meta::router())
+        .nest("/usermeta", routes::user_meta::router())
         .with_state(shared_state)
         .layer(cors)
         .fallback(fallback);
